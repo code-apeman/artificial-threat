@@ -1,3 +1,5 @@
+# Aseprite/LibreSprite binary
+ASEPRITE = libresprite
 # the compiler to use for making the object files
 CC = cc
 # the compiler to use for linking everything together
