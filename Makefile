@@ -33,5 +33,5 @@ obj:
 	mkdir obj
 
 clean:
-	rm -f obj/* $(OUTFILE)
+	rm -rf obj $(OUTFILE)
 
