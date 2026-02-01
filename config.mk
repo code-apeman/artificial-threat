@@ -12,5 +12,9 @@ LDFLAGS =
 OUTFILE = game
 # additional header file director(y/ies) for Allegro
 ALLEGRO_INCLUDES =
-# additional parameter(s) for Allegro libraries
+# additional parameter(s) for the linker to link against Allegro libraries
 ALLEGRO_LIBS = -lalleg
+# additional header file director(y/ies) for libopenmpt
+LIBOPENMPT_INCLUDES =
+# additional parameter(s) for the linker to link against libopenmpt libraries
+LIBOPENMPT_LIBS = -lopenmpt

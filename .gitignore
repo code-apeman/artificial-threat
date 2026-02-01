@@ -1,5 +1,8 @@
-# Object files
+# Intermediate build files
 obj
+
+# Resulting .dat files
+*.dat
 
 # Resulting executable
 game
