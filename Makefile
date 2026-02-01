@@ -16,7 +16,7 @@ music.dat: $(addprefix music/, $(MODFILES))
 	dat -a -c2 music.dat $^
 
 sprites.dat: $(addprefix obj/spr/, $(addsuffix .bmp, $(SPRITES)))
-	dat -a -c2 sprites.dat obj/spr/*
+	dat -a -c2 -t BMP sprites.dat obj/spr/*
 
 obj/bin/main.o: src/main.c obj/bin
 	$(CC) $(CFLAGS) -c src/main.c -o obj/bin/main.o $(INCLUDES)

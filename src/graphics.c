@@ -2,8 +2,6 @@
 #include "graphics.h"
 #include "error.h"
 
-extern PALETTE pal;
-
 void graphics_init(){
 	if (set_gfx_mode(GFX_AUTODETECT_WINDOWED, 320, 200, 0, 0) != 0)
 		handle_init_failure("graphics_init() (graphics.c)");
