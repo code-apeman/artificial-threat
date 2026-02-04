@@ -3,14 +3,13 @@
 #include "graphics.h"
 #include "sound.h"
 #include "error.h"
+#include "physics.h"
 
 #define NATSUKI_FRAME_W 24
 #define NATSUKI_FRAME_H 32
 #define NATSUKI_FRAME_NUM 8
 #define NATSUKI_SPEED_NORMAL 1
 #define NATSUKI_SPEED_SPRINT 3
-
-#define GRAVITY 15
 
 DATAFILE *music, *sprites, *backgrounds, *tiles;
 BITMAP *natsuki_spritesheet, *natsuki_sprite;
@@ -20,8 +19,8 @@ extern BITMAP *active_page, *inactive_page;
 extern bool game_exit_flag;
 unsigned long long int frames = 0;
 
-// Position
-unsigned int natsuki_x = 0, natsuki_y = 90;
+// Position, physics, etc.
+hitbox natsuki_hitbox = {{0, 90}, {NATSUKI_FRAME_W, NATSUKI_FRAME_H}};
 
 // Stats
 unsigned int natsuki_mhp = 50, natsuki_atk = 2, natsuki_def = 0;
@@ -104,14 +103,14 @@ void game_input() {     // input collection and processing
 }
 
 void game_logic() {     // everything else
-    if (control_state & CONTROL_LEFT) natsuki_x -= (control_state & CONTROL_SPRINT) ? NATSUKI_SPEED_SPRINT : NATSUKI_SPEED_NORMAL;
-    if (control_state & CONTROL_RIGHT) natsuki_x += (control_state & CONTROL_SPRINT) ? NATSUKI_SPEED_SPRINT : NATSUKI_SPEED_NORMAL;
+    if (control_state & CONTROL_LEFT) natsuki_hitbox.position.x -= (control_state & CONTROL_SPRINT) ? NATSUKI_SPEED_SPRINT : NATSUKI_SPEED_NORMAL;
+    if (control_state & CONTROL_RIGHT) natsuki_hitbox.position.x += (control_state & CONTROL_SPRINT) ? NATSUKI_SPEED_SPRINT : NATSUKI_SPEED_NORMAL;
 }
 
 void game_draw() {      // drawing the frame
     blit(background, inactive_page, 0, 0, 0, 0, GAME_HRES, GAME_VRES);
     blit(natsuki_spritesheet, natsuki_sprite, NATSUKI_FRAME_W * ((frames / 6) % NATSUKI_FRAME_NUM), 0, 0, 0, NATSUKI_FRAME_W, NATSUKI_FRAME_H);
-    draw_sprite(inactive_page, natsuki_sprite, natsuki_x - (NATSUKI_FRAME_W / 2), natsuki_y - (NATSUKI_FRAME_H / 2)); 
+    draw_sprite(inactive_page, natsuki_sprite, natsuki_hitbox.position.x - (NATSUKI_FRAME_W / 2), natsuki_hitbox.position.y - (NATSUKI_FRAME_H / 2)); 
     frames++;           // increment the frame counter
     page_flip();        // do what the function says
 }

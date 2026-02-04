@@ -3,7 +3,7 @@ include config.mk
 LIBS = $(ALLEGRO_LIBS) $(LIBOPENMPT_LIBS)
 INCLUDES = $(ALLEGRO_INCLUDES) $(LIBOPENMPT_INCLUDES)
 
-CODEFILES = graphics sound error game main
+CODEFILES = graphics sound error physics game main
 SPRITES = natsuki_walk
 BACKGROUNDS = bg_tokyo
 TILES = road road_slope pillar
