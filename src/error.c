@@ -3,6 +3,7 @@
 #include "textcolors.h"
 
 void handle_init_error(const char* error, const char* function_name){
+    set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
     allegro_message("%s%sINITIALIZATION ERROR%s: %s%s%s%s at %s%s%s%s.\n",
 			ANSI_COLOR_BRIGHT_RED,
 			ANSI_BOLD,

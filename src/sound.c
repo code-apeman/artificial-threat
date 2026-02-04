@@ -23,9 +23,26 @@ SAMPLE* allegro_sample_from_module(void* mod_data, size_t mod_size){
     }
     double duration = openmpt_module_get_duration_seconds(module);
     int pcm_length = (int)((double)freq * duration);
-    SAMPLE* resulting_sample = create_sample(bits, 0, freq, pcm_length);
-    if (openmpt_module_read_mono(module,
-                    freq, pcm_length,
-                    resulting_sample->data) != pcm_length) return NULL;
-    return resulting_sample;
+    SAMPLE* resulting_sample = create_sample(16, (chcount > 1) ? 1 : 0, freq, pcm_length);
+    if (chcount > 1) {
+        int16_t left[pcm_length];
+        int16_t right[pcm_length];
+        if (openmpt_module_read_stereo(module,
+                freq, pcm_length,
+                left, right)
+        != pcm_length) return NULL;
+        for (int i = 0; i < pcm_length; i++) {
+            ((int16_t*)resulting_sample->data)[i * 2] = left[i];
+            ((uint16_t*)resulting_sample->data)[i * 2] ^= 0x8000; // signed to unsigned conversion
+            ((int16_t*)resulting_sample->data)[(i * 2) + 1] = right[i];
+            ((uint16_t*)resulting_sample->data)[(i * 2) + 1] ^= 0x8000;
+        }
+    } else {
+        if (openmpt_module_read_mono(module,
+                freq, pcm_length,
+                resulting_sample->data)
+        != pcm_length) return NULL;
+        for (int i = 0; i < pcm_length; i++)
+            ((uint16_t*)resulting_sample->data)[i] ^= 0x8000;
+    } return resulting_sample;
 }

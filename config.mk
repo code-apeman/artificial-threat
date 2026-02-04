@@ -1,11 +1,13 @@
 # Aseprite/LibreSprite binary
 ASEPRITE = libresprite
+# the version of strip from binutils, uncomment to use
+#STRIP = strip
 # the compiler to use for making the object files
 CC = cc
 # the compiler to use for linking everything together
 CCLD = $(CC)
 # flags to use with $(CC)
-CFLAGS = -g -O2 -pipe
+CFLAGS = -g -O2 -pipe -Wall
 # flags to use with $(CCLD)
 LDFLAGS =
 # output file name
