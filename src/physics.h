@@ -5,14 +5,12 @@ typedef struct vector2 {
 typedef struct hitbox {
     vector2 position;
     const vector2 size;
-} hitbox;
-typedef struct masked_hitbox {
-    hitbox bounds;
     void *mask;
-} masked_hitbox;
+} hitbox;
 
 #define GRAVITY 15
 
+bool check_collision(hitbox collider_a, hitbox collider_b);
 #define PHYSICS_H
 #else
 #warning "Multiple inclusions of physics.h"
