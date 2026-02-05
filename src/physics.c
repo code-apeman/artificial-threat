@@ -25,8 +25,9 @@ void remove_hitbox(hitbox collider){
             colliders[i].mask == collider.mask) {
         index = i; break;
     } if (index == -1) return;
-    for (size_t i = index; i < --collider_count; i++) colliders[i] = colliders[i + 1];
-    colliders = realloc(colliders, sizeof(hitbox) * (collider_count + 1));
+    collider_count--;
+    for (size_t i = index; i < collider_count; i++) colliders[i] = colliders[i + 1];
+    colliders = realloc(colliders, sizeof(hitbox) * collider_count);
 }
 
 vector2 *get_hitbox_points(hitbox collider){
