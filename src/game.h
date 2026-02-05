@@ -1,4 +1,5 @@
 #ifndef GAME_H
+#define FRAMETIME_HWTICKS 19886
 void game_init(void);
 void game_input(void);
 void game_logic(void);

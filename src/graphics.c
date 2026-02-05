@@ -2,32 +2,18 @@
 #include "graphics.h"
 #include "error.h"
 
-BITMAP *page1, *page2;
-BITMAP *active_page, *inactive_page;
-bool second_page_active = false;
+BITMAP *buffer;
 
 void graphics_init(){
-	if (set_gfx_mode(GFX_AUTODETECT_WINDOWED, GAME_HRES, GAME_VRES, GAME_HRES * 4, GAME_VRES * 4) != 0)
+	if (set_gfx_mode(GFX_AUTODETECT_WINDOWED, 1600, 900, 0, 0) != 0)
 		handle_init_failure("graphics_init() (graphics.c)");
     set_window_title("Artificial Threat");
     set_palette(default_palette);
-    page1 = create_video_bitmap(GAME_HRES * 2, GAME_VRES * 2);
-    if (!page1)
-        handle_init_error("Failed to allocate the first screen page", "graphics_init() (graphics.c)");
-    page2 = create_video_bitmap(GAME_HRES * 2, GAME_VRES * 2);
-    if (!page2)
-        handle_init_error("Failed to allocate the second screen page", "graphics_init() (graphics.c)");
-    active_page = page1;
-    inactive_page = page2;
+    buffer = create_bitmap(GAME_HRES, GAME_VRES);
+    if (!buffer)
+        handle_init_error("Failed to allocate the frame buffer", "graphics_init() (graphics.c)");
 }
 
-void page_flip(){
-    if (second_page_active) {
-        active_page = page1;
-        inactive_page = page2;
-    } else {
-        active_page = page2;
-        inactive_page = page1;
-    } second_page_active = !second_page_active;
-    show_video_bitmap(active_page);
+void buffer_show(){
+    stretch_blit(buffer, screen, 0, 0, GAME_HRES, GAME_VRES, 0, 0, SCREEN_W, SCREEN_H);
 }
