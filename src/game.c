@@ -20,7 +20,7 @@ extern bool game_exit_flag;
 unsigned long long int frames = 0;
 
 // Position, physics, etc.
-hitbox natsuki_hitbox = {{0, 90}, {NATSUKI_FRAME_W, NATSUKI_FRAME_H}};
+hitbox natsuki_hitbox;
 
 // Stats
 unsigned int natsuki_mhp = 50, natsuki_atk = 2, natsuki_def = 0;
@@ -94,6 +94,7 @@ void game_init() {      // initialization routine
     title_theme_sample = allegro_sample_from_module(title_theme->dat, title_theme->size);
     natsuki_spritesheet = find_datafile_object(sprites, "NATSUKI_WALK_BMP")->dat;
     natsuki_sprite = create_bitmap(NATSUKI_FRAME_W, NATSUKI_FRAME_H);
+    natsuki_hitbox = create_hitbox(0, 90, NATSUKI_FRAME_W, NATSUKI_FRAME_H, NATSUKI_FRAME_W / 2, NATSUKI_FRAME_H / 2, NULL);
     background = find_datafile_object(backgrounds, "BG_TOKYO_BMP")->dat;
     play_sample(title_theme_sample, 255, 128, 1000, 1);
 }
