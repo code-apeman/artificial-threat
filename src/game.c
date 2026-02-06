@@ -10,6 +10,7 @@
 #define NATSUKI_FRAME_NUM 8
 #define NATSUKI_SPEED_NORMAL 1
 #define NATSUKI_SPEED_SPRINT 3
+#define NATSUKI_JUMP_SPEED 5
 
 DATAFILE *music, *sprites, *backgrounds, *tiles;
 BITMAP *natsuki_spritesheet, *natsuki_sprite;
@@ -27,13 +28,15 @@ int natsuki_y_speed = 0;
 // Stats
 unsigned int natsuki_mhp = 50, natsuki_atk = 2, natsuki_def = 0;
 unsigned int natsuki_lv = 1, natsuki_exp = 0, natsuki_exp_to_next = 50;
-int natsuki_hp = 50;
+unsigned int natsuki_max_air_jumps = 0;
+int natsuki_hp = 50, natsuki_air_jumps = 0;
+bool grounded = false;
 
 // Scrolling
 unsigned int camera_x = 0, camera_y = 0;
 
 // Controls
-unsigned char control_state = 0;
+volatile unsigned char control_state = 0;
 
 #define CONTROL_LEFT          0b00000001
 #define CONTROL_RIGHT         0b00000010
@@ -58,14 +61,14 @@ void keyboard_handler(int scancode) {
     } else switch (scancode & 0x7f) {
         case KEY_ESC: game_exit_flag = true; break;
 
-        case KEY_LEFT:  control_state |= CONTROL_LEFT;           break;
-        case KEY_RIGHT: control_state |= CONTROL_RIGHT;          break;
-        case KEY_UP:    control_state |= CONTROL_UP;             break;
-        case KEY_DOWN:  control_state |= CONTROL_DOWN;           break;
-        case KEY_Z:     control_state |= CONTROL_JUMP;           break;
-        case KEY_X:     control_state |= CONTROL_SPRINT;         break;
-        case KEY_C:     control_state |= CONTROL_ATTACK_MELEE;   break;
-        case KEY_A:     control_state |= CONTROL_ATTACK_RANGED;  break;
+        case KEY_LEFT:  control_state |=  CONTROL_LEFT;          break;
+        case KEY_RIGHT: control_state |=  CONTROL_RIGHT;         break;
+        case KEY_UP:    control_state |=  CONTROL_UP;            break;
+        case KEY_DOWN:  control_state |=  CONTROL_DOWN;          break;
+        case KEY_Z:     control_state |=  CONTROL_JUMP;          break;
+        case KEY_X:     control_state |=  CONTROL_SPRINT;        break;
+        case KEY_C:     control_state |=  CONTROL_ATTACK_MELEE;  break;
+        case KEY_A:     control_state |=  CONTROL_ATTACK_RANGED; break;
     }
 }
 END_OF_FUNCTION(keyboard_handler)
@@ -81,6 +84,7 @@ void game_init() {      // initialization routine
     sound_init();
     install_keyboard();
 
+    LOCK_VARIABLE(control_state);
     LOCK_FUNCTION(keyboard_handler);
     keyboard_lowlevel_callback = keyboard_handler;
 
@@ -118,6 +122,12 @@ void game_input() {     // input collection and processing
 void game_logic() {     // everything else
     if ((control_state & CONTROL_LEFT) && check_moving(natsuki_hitbox, (control_state & CONTROL_SPRINT) ? -NATSUKI_SPEED_SPRINT : -NATSUKI_SPEED_NORMAL, 0)) natsuki_hitbox.position.x -= (control_state & CONTROL_SPRINT) ? NATSUKI_SPEED_SPRINT : NATSUKI_SPEED_NORMAL;
     if ((control_state & CONTROL_RIGHT) && check_moving(natsuki_hitbox, (control_state & CONTROL_SPRINT) ? NATSUKI_SPEED_SPRINT : NATSUKI_SPEED_NORMAL, 0)) natsuki_hitbox.position.x += (control_state & CONTROL_SPRINT) ? NATSUKI_SPEED_SPRINT : NATSUKI_SPEED_NORMAL;
+    grounded = !check_moving(natsuki_hitbox, 0, 1);
+    if (grounded) natsuki_air_jumps = natsuki_max_air_jumps;
+    if ((control_state & CONTROL_JUMP) && (grounded || (natsuki_air_jumps > 0))) {
+        if (!grounded) natsuki_air_jumps--;
+        natsuki_y_speed = -NATSUKI_JUMP_SPEED;
+    }
     if (check_moving(natsuki_hitbox, 0, natsuki_y_speed)) {
         natsuki_hitbox.position.y += natsuki_y_speed;
         if ((frames % (int)(1/GRAVITY)) == 0) natsuki_y_speed++;
