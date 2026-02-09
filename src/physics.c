@@ -1,6 +1,5 @@
 #include "includes.h"
 #include "physics.h"
-#include <stdio.h>
 
 size_t collider_count = 0;
 hitbox* colliders = NULL;
@@ -107,7 +106,7 @@ bool check_collision(hitbox collider_a, hitbox collider_b){
     size_t row_size_a = collider_a.size.x / 8 + (last_bit_length_a > 0);
     size_t row_size_b = collider_b.size.x / 8 + (last_bit_length_b > 0);
     // and now the real fun (/s): evil bitwise fuckery
-    // bitmasks of colliders
+    // bitmasks of colliders' overlapping areas
     
     if (!collider_a.mask) free(mask_a);
     if (!collider_b.mask) free(mask_b);
