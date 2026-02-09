@@ -3,7 +3,7 @@ typedef struct vector2 {
     int x, y;
 } vector2;
 
-// mask (if not NULL) should always have (((size.x * size.y) / 8) + (size.x * size.y % 8 > 0)) bytes allocated in memory, otherwise it would segfault
+// mask (if not NULL) should always have (((size.x * size.y) / 8) + ((size.x % 8 > 0) * size.y)) bytes allocated in memory, otherwise it would segfault
 typedef struct hitbox {
     unsigned int id;
     vector2 position, size, origin;
