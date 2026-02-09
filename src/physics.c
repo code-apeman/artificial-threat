@@ -40,6 +40,8 @@ bool check_collision(hitbox collider_a, hitbox collider_b){
     // if both are NULL, we don't bother assigning masks since we know already that the hitboxes overlap
     if ((!collider_a.mask) && (!collider_b.mask)) return true;
     // and now for the fun part: collision check of bitmasked hitboxes
+    // for returning stuff in the gotos
+    bool result = false;
     // first we assign an all-1 mask to the NULL-mask hitbox
     void *mask_a, *mask_b;
     size_t mask_a_bytesize = ((collider_a.size.x * collider_a.size.y) / 8) + ((collider_a.size.x % 8 > 0) * collider_a.size.y);
@@ -49,7 +51,7 @@ bool check_collision(hitbox collider_a, hitbox collider_b){
         for (int i = 0; i < mask_a_bytesize; i++)
             if ((i + 1) % (mask_a_bytesize / collider_a.size.y) == 0) {
                 ((char*)mask_a)[i] = 0;
-                for (int j = 7; j > (collider_a.size.x % 8); j--) ((char*)mask_a)[i] |= 1 << j;
+                for (int j = 7; j >= (8 - (collider_a.size.x % 8)); j--) ((char*)mask_a)[i] |= 1 << j;
             } else ((char*)mask_a)[i] = 0xFF;
     } else mask_a = collider_a.mask; 
     if (!collider_b.mask) {
@@ -57,7 +59,7 @@ bool check_collision(hitbox collider_a, hitbox collider_b){
         for (int i = 0; i < mask_b_bytesize; i++)
             if ((i + 1) % (mask_b_bytesize / collider_b.size.y) == 0) {
                 ((char*)mask_b)[i] = 0;
-                for (int j = 7; j > (collider_b.size.x % 8); j--) ((char*)mask_b)[i] |= 1 << j;
+                for (int j = 7; j >= (8 - (collider_b.size.x % 8)); j--) ((char*)mask_b)[i] |= 1 << j;
             } else ((char*)mask_b)[i] = 0xFF;
     } else mask_b = collider_b.mask;
     // and now we calculate the size and the coords of the overlap
@@ -99,18 +101,60 @@ bool check_collision(hitbox collider_a, hitbox collider_b){
     // overlap width and height
     unsigned int overlap_w = (points_a[corner2index_a].x - overlap_corner_a_glob.x > 0) ? (points_a[corner2index_a].x - overlap_corner_a_glob.x) : -(points_a[corner2index_a].x - overlap_corner_a_glob.x);
     unsigned int overlap_h = (points_a[corner2index_a].y - overlap_corner_a_glob.y > 0) ? (points_a[corner2index_a].y - overlap_corner_a_glob.y) : -(points_a[corner2index_a].y - overlap_corner_a_glob.y);
-    // length of the last bit of a row
-    unsigned char last_bit_length_a = collider_a.size.x % 8; if (last_bit_length_a == 0) last_bit_length_a = 8;
-    unsigned char last_bit_length_b = collider_b.size.x % 8; if (last_bit_length_b == 0) last_bit_length_b = 8;
+    // length of the last byte of a row
+    unsigned char last_byte_length_a = collider_a.size.x % 8; if (last_byte_length_a == 0) last_byte_length_a = 8;
+    unsigned char last_byte_length_b = collider_b.size.x % 8; if (last_byte_length_b == 0) last_byte_length_b = 8;
     // row size (in bytes)
-    size_t row_size_a = collider_a.size.x / 8 + (last_bit_length_a > 0);
-    size_t row_size_b = collider_b.size.x / 8 + (last_bit_length_b > 0);
+    size_t row_size_a = collider_a.size.x / 8 + (last_byte_length_a != 8);
+    size_t row_size_b = collider_b.size.x / 8 + (last_byte_length_b != 8);
     // and now the real fun (/s): evil bitwise fuckery
     // bitmasks of colliders' overlapping areas
-    
+    // allocation and filling
+    void* overlap_mask_a = malloc(mask_a_bytesize);
+    for (int i = 0; i < mask_a_bytesize; i++) ((char*)overlap_mask_a)[i] = 0x00;
+    void* overlap_mask_b = malloc(mask_b_bytesize);
+    for (int i = 0; i < mask_b_bytesize; i++) ((char*)overlap_mask_b)[i] = 0x00;
+    // actual calculation (sorry for bad readability)
+    // collider A mask
+    for (int i = (a_lower_than_b ? 0 : overlap_corner_a.y); i < (a_lower_than_b ? overlap_corner_a.y : collider_a.size.y); i++){
+        if (a_righter_than_b) for (int j = 0; j < ((overlap_corner_a.x / 8) + ((overlap_corner_a.x % 8) > 0)); j++) {
+            if (j == (overlap_corner_a.x / 8))
+                for (int k = 7; k >= (8 - (overlap_corner_a.x % 8)); k--)
+                    ((char*)overlap_mask_a)[(i * row_size_a) + j] |= 1 << k;
+            else ((char*)overlap_mask_a)[(i * row_size_a) + j] = 0xFF;
+        } else { for (int j = (overlap_corner_a.x / 8); j < row_size_a; j++)
+            if (j == (overlap_corner_a.x / 8))
+                for (int k = 0; k < (abs((int)overlap_w - (int)last_byte_length_a) % 8); k++) ((char*)overlap_mask_a)[(i * row_size_a) + j] |= 1 << k;
+            else if (j == (row_size_a - 1))
+                for (int k = 7; k >= (8 - last_byte_length_a); k--) ((char*)overlap_mask_a)[(i * row_size_a) + j] |= 1 << k;
+            else ((char*)overlap_mask_a)[(i * row_size_a) + j] = 0xFF;
+        }
+    }
+    // collider B mask
+    for (int i = (!a_lower_than_b ? 0 : overlap_corner_b.y); i < (!a_lower_than_b ? overlap_corner_b.y : collider_b.size.y); i++){
+        if (!a_righter_than_b) for (int j = 0; j < ((overlap_corner_b.x / 8) + ((overlap_corner_b.x % 8) > 0)); j++) {
+            if (j == (overlap_corner_b.x / 8))
+                for (int k = 7; k >= (8 - (overlap_corner_b.x % 8)); k--)
+                    ((char*)overlap_mask_b)[(i * row_size_b) + j] |= 1 << k;
+            else ((char*)overlap_mask_b)[(i * row_size_b) + j] = 0xFF;
+        } else { for (int j = (overlap_corner_b.x / 8); j < row_size_b; j++)
+            if (j == (overlap_corner_b.x / 8))
+                for (int k = 0; k < (abs((int)overlap_w - (int)last_byte_length_b) % 8); k++) ((char*)overlap_mask_b)[(i * row_size_b) + j] |= 1 << k;
+            else if (j == (row_size_b - 1))
+                for (int k = 7; k >= (8 - last_byte_length_b); k--) ((char*)overlap_mask_b)[(i * row_size_b) + j] |= 1 << k;
+            else ((char*)overlap_mask_b)[(i * row_size_b) + j] = 0xFF;
+        }
+    }
+    // now, let's calculate the overlap (finally???)
+    size_t overlap_bytesize = ((overlap_w * overlap_h) / 8) + ((overlap_w % 8 > 0) * overlap_h);
+    void *overlap = malloc(overlap_bytesize);
+free_mem_return:
+    free(overlap);
+    free(overlap_mask_a);
+    free(overlap_mask_b);
     if (!collider_a.mask) free(mask_a);
     if (!collider_b.mask) free(mask_b);
-    return true;
+    return result;
 }
 
 bool check_moving(hitbox collider, int delta_x, int delta_y){
