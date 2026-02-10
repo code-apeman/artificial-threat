@@ -148,12 +148,14 @@ bool check_collision(hitbox collider_a, hitbox collider_b){
     // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA MAKE IT STOP
     unsigned int row_a, row_b, ;
     for (int i = 0; i < overlap_h; i++){
-        if (a_lower_than_b) for (int j = 0; j < overlap_rowsize; j++){
-
-            if (a_righter_than_b){
-                ((char*)overlap_buf)[(i * overlap_rowsize) + j] = ;
-            } else {
-                ((char*)overlap_buf)[(i * overlap_rowsize) + j] = ;
+        if (a_lower_than_b){
+            row_a = i; row_b = i + (collider_b.size.x - overlap_h);
+            for (int j = 0; j < overlap_rowsize; j++){
+                if (a_righter_than_b){
+                    ((char*)overlap_buf)[(i * overlap_rowsize) + j] = ;
+                } else {
+                    ((char*)overlap_buf)[(i * overlap_rowsize) + j] = ;
+                }
             }
         } else for (int j = 0; j < overlap_rowsize; j++){
             
