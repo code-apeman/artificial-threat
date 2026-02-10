@@ -40,7 +40,7 @@ bool check_collision(hitbox collider_a, hitbox collider_b){
     // if both are NULL, we don't bother assigning masks since we know already that the hitboxes overlap
     if ((!collider_a.mask) && (!collider_b.mask)) return true;
     // and now for the fun part: collision check of bitmasked hitboxes
-    // for returning stuff in the gotos
+    // for returning stuff in the end
     bool result = false;
     // first we assign an all-1 mask to the NULL-mask hitbox
     void *mask_a, *mask_b;
@@ -146,22 +146,25 @@ bool check_collision(hitbox collider_a, hitbox collider_b){
     for (int i = 0; i < overlap_bytesize; i++) ((char*)overlap_buf)[i] = 0;
     // now, let's calculate it (finally???)
     // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA MAKE IT STOP
-    unsigned int row_a, row_b, ;
+    unsigned int row_a, row_b, byte_a, byte_b, offset_a, offset_b;
     for (int i = 0; i < overlap_h; i++){
         if (a_lower_than_b){
             row_a = i; row_b = i + (collider_b.size.x - overlap_h);
             for (int j = 0; j < overlap_rowsize; j++){
                 if (a_righter_than_b){
-                    ((char*)overlap_buf)[(i * overlap_rowsize) + j] = ;
+                    ((char*)overlap_buf)[(i * overlap_rowsize) + j] = 0;
                 } else {
-                    ((char*)overlap_buf)[(i * overlap_rowsize) + j] = ;
+                    ((char*)overlap_buf)[(i * overlap_rowsize) + j] = 0;
                 }
             }
-        } else for (int j = 0; j < overlap_rowsize; j++){
-            
+        } else {
+            row_a = i + (collider_a.size.x - overlap_h); row_b = i;
+            for (int j = 0; j < overlap_rowsize; j++){
+            }
         }
     }
-free_mem_return:
+    // actual check, freeing up the lots of used RAM and returning the check result
+    for (int i = 0; i < overlap_bytesize; i++) { result = ((char*)overlap_buf)[i] != 0; if (result) break; }
     free(overlap_buf);
     free(overlap_mask_a);
     free(overlap_mask_b);
