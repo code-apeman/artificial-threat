@@ -92,15 +92,9 @@ bool check_collision(hitbox collider_a, hitbox collider_b){
         overlap_corner_b_glob.x - points_b[0].x,
         overlap_corner_b_glob.y - points_b[0].y
     };
-    // second corner index, as in:
-    // 0--1
-    // |  |
-    // 2--3
-    unsigned char corner2index_a = (((char)  a_lower_than_b) << 1) | ((char)  a_righter_than_b);
-    unsigned char corner2index_b = (((char) !a_lower_than_b) << 1) | ((char) !a_righter_than_b);
     // overlap width and height
-    unsigned int overlap_w = (points_a[corner2index_a].x - overlap_corner_a_glob.x > 0) ? (points_a[corner2index_a].x - overlap_corner_a_glob.x) : -(points_a[corner2index_a].x - overlap_corner_a_glob.x);
-    unsigned int overlap_h = (points_a[corner2index_a].y - overlap_corner_a_glob.y > 0) ? (points_a[corner2index_a].y - overlap_corner_a_glob.y) : -(points_a[corner2index_a].y - overlap_corner_a_glob.y);
+    unsigned int overlap_w = (points_a[(((char)a_lower_than_b) << 1) | ((char)a_righter_than_b)].x - overlap_corner_a_glob.x > 0) ? (points_a[(((char)a_lower_than_b) << 1) | ((char)a_righter_than_b)].x - overlap_corner_a_glob.x) : -(points_a[(((char)a_lower_than_b) << 1) | ((char)a_righter_than_b)].x - overlap_corner_a_glob.x);
+    unsigned int overlap_h = (points_a[(((char)a_lower_than_b) << 1) | ((char)a_righter_than_b)].y - overlap_corner_a_glob.y > 0) ? (points_a[(((char)a_lower_than_b) << 1) | ((char)a_righter_than_b)].y - overlap_corner_a_glob.y) : -(points_a[(((char)a_lower_than_b) << 1) | ((char)a_righter_than_b)].y - overlap_corner_a_glob.y);
     // length of the last byte of a row
     unsigned char last_byte_length_a = collider_a.size.x % 8; if (last_byte_length_a == 0) last_byte_length_a = 8;
     unsigned char last_byte_length_b = collider_b.size.x % 8; if (last_byte_length_b == 0) last_byte_length_b = 8;
@@ -145,11 +139,28 @@ bool check_collision(hitbox collider_a, hitbox collider_b){
             else ((char*)overlap_mask_b)[(i * row_size_b) + j] = 0xFF;
         }
     }
-    // now, let's calculate the overlap (finally???)
-    size_t overlap_bytesize = ((overlap_w * overlap_h) / 8) + ((overlap_w % 8 > 0) * overlap_h);
-    void *overlap = malloc(overlap_bytesize);
+    // overlap size and buffer
+    size_t overlap_rowsize = (overlap_w / 8) + (overlap_w % 8 > 0);
+    size_t overlap_bytesize = overlap_rowsize * overlap_h;
+    void *overlap_buf = malloc(overlap_bytesize);
+    for (int i = 0; i < overlap_bytesize; i++) ((char*)overlap_buf)[i] = 0;
+    // now, let's calculate it (finally???)
+    // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA MAKE IT STOP
+    unsigned int row_a, row_b, ;
+    for (int i = 0; i < overlap_h; i++){
+        if (a_lower_than_b) for (int j = 0; j < overlap_rowsize; j++){
+
+            if (a_righter_than_b){
+                ((char*)overlap_buf)[(i * overlap_rowsize) + j] = ;
+            } else {
+                ((char*)overlap_buf)[(i * overlap_rowsize) + j] = ;
+            }
+        } else for (int j = 0; j < overlap_rowsize; j++){
+            
+        }
+    }
 free_mem_return:
-    free(overlap);
+    free(overlap_buf);
     free(overlap_mask_a);
     free(overlap_mask_b);
     if (!collider_a.mask) free(mask_a);
