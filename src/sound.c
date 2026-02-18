@@ -12,6 +12,7 @@ void sound_init(){
     chcount = get_mixer_channels();
 }
 
+// TODO: use AUDIOSTREAM instead of (VERY!) unreliably determining the module length and converting it to a regular sample
 SAMPLE* allegro_sample_from_module(void* mod_data, size_t mod_size){
     int error = OPENMPT_ERROR_OK;
     const char* error_message = NULL;
