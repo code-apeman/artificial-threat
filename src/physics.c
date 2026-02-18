@@ -145,12 +145,31 @@ bool check_collision(hitbox collider_a, hitbox collider_b){
     void *overlap_buf = malloc(overlap_bytesize);
     for (int i = 0; i < overlap_bytesize; i++) ((char*)overlap_buf)[i] = 0;
     // now, let's calculate it (finally???)
-    // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA MAKE IT STOP
     unsigned int row_a, row_b, byte_a, byte_b, offset_a, offset_b;
     for (int i = 0; i < overlap_h; i++){
         if (a_lower_than_b){
             row_a = i; row_b = i + (collider_b.size.x - overlap_h);
             for (int j = 0; j < overlap_rowsize; j++){
+                // TODO: actually fill the overlap buffer with real data
+                /* thoughts on how to do that ahead
+
+                should be like
+                ---||||| collider A overlap mask byte na of row ma
+                ^^^      3 bit offset
+                
+                ||||||-- collider B overlap mask byte nb of row mb
+                ^^^^^^   6 bit length
+                
+                nb is collider B's row length in bytes
+                collider B's last byte of the row's length is 7
+                
+                so collider A's mask byte na would be bitshifted right by 3 (?)
+                byte na + 1 should be ANDed with 0b11100000 and bitshifted left by 8 - 5 (= 3) (???)
+
+                */
+
+                // i have no idea how to properly do that
+                // neither do i know what i'm doing
                 if (a_righter_than_b){
                     ((char*)overlap_buf)[(i * overlap_rowsize) + j] = 0;
                 } else {
