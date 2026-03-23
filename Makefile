@@ -32,32 +32,21 @@ bgs.dat: $(addprefix obj/bg/, $(addsuffix .bmp, $(BACKGROUNDS)))
 tiles.dat: $(addprefix obj/tile/, $(addsuffix .bmp, $(TILES)))
 	dat -a -c2 -t BMP tiles.dat $^
 
-$(addprefix obj/bin/, $(addsuffix .o, $(CODEFILES))): obj/bin
+$(addprefix obj/bin/, $(addsuffix .o, $(CODEFILES))):
+	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $(subst obj/bin/,src/,$(subst .o,.c,$@)) -o $@ $(INCLUDES)
 
-obj/spr/natsuki_walk.bmp: sprites/natsuki/natsuki_walk.ase obj/spr
+obj/spr/natsuki_walk.bmp: sprites/natsuki/natsuki_walk.ase
+	@mkdir -p $(@D)
 	$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $^ >/dev/null
 
-obj/bg/bg_tokyo.bmp: backgrounds/bg_tokyo.ase obj/bg
+obj/bg/bg_tokyo.bmp: backgrounds/bg_tokyo.ase
+	@mkdir -p $(@D)
 	$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $^ >/dev/null
 
-$(addprefix obj/tile/, $(addsuffix .bmp, $(TILES))): obj/tile
+$(addprefix obj/tile/, $(addsuffix .bmp, $(TILES))):
+	@mkdir -p $(@D)
 	$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $(subst obj/tile/,tiles/,$(subst .bmp,.ase,$@)) >/dev/null
-
-obj/bin: obj
-	mkdir obj/bin
-
-obj/spr: obj
-	mkdir obj/spr
-
-obj/bg: obj
-	mkdir obj/bg
-
-obj/tile: obj
-	mkdir obj/tile
-
-obj:
-	mkdir obj
 
 clean:
 	rm -rf obj *.dat $(OUTFILE)
