@@ -15,7 +15,6 @@
 DATAFILE *music, *sprites, *backgrounds, *tiles;
 BITMAP *natsuki_spritesheet, *natsuki_sprite;
 BITMAP *background;
-SAMPLE *title_theme_sample;
 extern BITMAP *buffer;
 extern bool game_exit_flag;
 extern volatile bool frame_flag;
@@ -104,15 +103,15 @@ void game_init() {      // initialization routine
     tiles = load_datafile("tiles.dat");
     if (!tiles) handle_init_error("Could not load tiles.dat", "game_init() (game.c)");
 
-    DATAFILE *title_theme = find_datafile_object(music, "TITLE_IT");
+    DATAFILE *title_theme = find_datafile_object(music, "DOOMSDAY_IT");
     if (!title_theme) handle_init_error("Could not load the title song from music.dat (is the file corrupt?)", "game_init() (game.c)");
-    title_theme_sample = allegro_sample_from_module(title_theme->dat, title_theme->size);
+    if (!load_module(title_theme->dat, title_theme->size)) handle_init_error("Could not load the title song from music.dat (is the file corrupt?)", "game_init() (game.c)");
     natsuki_spritesheet = find_datafile_object(sprites, "NATSUKI_WALK_BMP")->dat;
     natsuki_sprite = create_bitmap(NATSUKI_FRAME_W, NATSUKI_FRAME_H);
     natsuki_hitbox = create_hitbox(160, 45, NATSUKI_FRAME_W, NATSUKI_FRAME_H, NATSUKI_FRAME_W / 2, NATSUKI_FRAME_H / 2, NULL);
     create_hitbox(160, 135, 320, 45, 160, 0, NULL);
     background = find_datafile_object(backgrounds, "BG_TOKYO_BMP")->dat;
-    play_sample(title_theme_sample, 255, 128, 1000, 1);
+    play_module();
 }
 
 void game_input() {     // input collection and processing
@@ -132,6 +131,7 @@ void game_logic() {     // everything else
         natsuki_hitbox.position.y += natsuki_y_speed;
         if ((frames % (int)(1/GRAVITY)) == 0) natsuki_y_speed++;
     } else natsuki_y_speed = 0;
+    buffer_check_callback();
 }
 
 void game_draw() {      // drawing the frame
