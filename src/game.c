@@ -103,7 +103,7 @@ void game_init() {      // initialization routine
     tiles = load_datafile("tiles.dat");
     if (!tiles) handle_init_error("Could not load tiles.dat", "game_init() (game.c)");
 
-    DATAFILE *title_theme = find_datafile_object(music, "DOOMSDAY_IT");
+    DATAFILE *title_theme = find_datafile_object(music, "ZOLOFT_IT");
     if (!title_theme) handle_init_error("Could not load the title song from music.dat (is the file corrupt?)", "game_init() (game.c)");
     if (!load_module(title_theme->dat, title_theme->size)) handle_init_error("Could not load the title song from music.dat (is the file corrupt?)", "game_init() (game.c)");
     natsuki_spritesheet = find_datafile_object(sprites, "NATSUKI_WALK_BMP")->dat;

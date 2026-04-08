@@ -7,7 +7,7 @@ CODEFILES = graphics sound error physics game main
 SPRITES = natsuki_walk
 BACKGROUNDS = bg_tokyo
 TILES = road road_slope pillar
-MODFILES = title.it doomsday.it deathomen.it
+MODFILES = title.it doomsday.it deathomen.it zoloft.it
 
 all: no-cleanup
 	rm -rf obj
