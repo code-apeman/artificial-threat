@@ -7,7 +7,7 @@ typedef struct vector2 {
 typedef struct hitbox {
     unsigned int id;
     vector2 position, size, origin;
-    void *mask;
+    bool mirrored_x, mirrored_y, is_slope;
 } hitbox;
 
 #define GRAVITY 0.2f

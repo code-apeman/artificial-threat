@@ -1,5 +1,5 @@
 #ifndef SOUND_H
-#include "includes.h"
+#include <allegro.h>
 #define BUFFER_SIZE (1024)
 void sound_init(void);
 SAMPLE* allegro_sample_from_module(void* mod_data, size_t mod_size);
