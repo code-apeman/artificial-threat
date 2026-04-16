@@ -4,8 +4,8 @@
 size_t collider_count = 0;
 hitbox* colliders = NULL;
 
-hitbox create_hitbox(int position_x, int position_y, int width, int height, int origin_x, int origin_y, void *mask){
-    hitbox collider = {collider_count, {position_x, position_y}, {width, height}, {origin_x, origin_y}, mask};
+hitbox create_hitbox(int position_x, int position_y, int width, int height, int origin_x, int origin_y, bool flipped_x, bool flipped_y, bool slope){
+    hitbox collider = {collider_count, {position_x, position_y}, {width, height}, {origin_x, origin_y}, (flipped_y * 2) ^ flipped_x, slope};
     colliders = realloc(colliders, sizeof(hitbox) * (collider_count + 1));
     colliders[collider_count] = collider;
     collider_count++;
