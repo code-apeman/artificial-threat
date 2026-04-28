@@ -4,7 +4,7 @@ LIBS = $(ALLEGRO_LIBS) $(LIBOPENMPT_LIBS)
 INCLUDES = $(ALLEGRO_INCLUDES) $(LIBOPENMPT_INCLUDES)
 
 CODEFILES = graphics sound error physics game main
-SPRITES = natsuki_walk natsuki_run
+SPRITES = natsuki_walk natsuki_run natsuki_jump natsuki_fall
 BACKGROUNDS = bg_tokyo
 TILES = road road_slope pillar
 MODFILES = title.it doomsday.it deathomen.it zoloft.it
@@ -36,13 +36,9 @@ $(addprefix obj/bin/, $(addsuffix .o, $(CODEFILES))):
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $(subst obj/bin/,src/,$(subst .o,.c,$@)) -o $@ $(INCLUDES)
 
-obj/spr/natsuki_walk.bmp: sprites/natsuki/natsuki_walk.ase
+$(addprefix obj/spr/, $(addsuffix .bmp, $(SPRITES))):
 	@mkdir -p $(@D)
-	$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $^ >/dev/null
-
-obj/spr/natsuki_run.bmp: sprites/natsuki/natsuki_run.ase
-	@mkdir -p $(@D)
-	$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $^ >/dev/null
+	$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $(subst obj/spr/,sprites/,$(subst .bmp,.ase,$@)) >/dev/null
 
 obj/bg/bg_tokyo.bmp: backgrounds/bg_tokyo.ase
 	@mkdir -p $(@D)

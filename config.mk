@@ -1,5 +1,5 @@
 # Aseprite/LibreSprite binary
-ASEPRITE = libresprite
+ASEPRITE = aseprite
 # the version of strip from binutils, uncomment to use
 #STRIP = strip
 # the compiler to use for making the object files

@@ -10,12 +10,13 @@
 #define NATSUKI_FRAME_NUM_WALK 8
 #define NATSUKI_FRAME_NUM_RUN 6
 #define NATSUKI_FRAME_NUM_FALL 4
+#define NATSUKI_FRAME_NUM_JUMP 1
 #define NATSUKI_SPEED_NORMAL 1
 #define NATSUKI_SPEED_SPRINT 3
 #define NATSUKI_JUMP_SPEED 5
 
 DATAFILE *music, *sprites, *backgrounds, *tiles;
-BITMAP *natsuki_spritesheet_walk, *natsuki_spritesheet_run, *natsuki_sprite;
+BITMAP *natsuki_spritesheet_walk, *natsuki_spritesheet_run, *natsuki_spritesheet_fall, *natsuki_spritesheet_jump, *natsuki_sprite;
 BITMAP *background;
 extern BITMAP *buffer;
 extern bool game_exit_flag;
@@ -111,6 +112,8 @@ void game_init() {      // initialization routine
     if (!load_module(title_theme->dat, title_theme->size)) handle_init_error("Could not load the title song from music.dat (is the file corrupt?)", "game_init() (game.c)");
     natsuki_spritesheet_walk = find_datafile_object(sprites, "NATSUKI_WALK_BMP")->dat;
     natsuki_spritesheet_run = find_datafile_object(sprites, "NATSUKI_RUN_BMP")->dat;
+    natsuki_spritesheet_fall = find_datafile_object(sprites, "NATSUKI_FALL_BMP")->dat;
+    natsuki_spritesheet_jump = find_datafile_object(sprites, "NATSUKI_JUMP_BMP")->dat;
     natsuki_sprite = create_bitmap(NATSUKI_FRAME_W, NATSUKI_FRAME_H);
     natsuki_hitbox = create_hitbox(160, 45, NATSUKI_FRAME_W, NATSUKI_FRAME_H, NATSUKI_FRAME_W / 2, NATSUKI_FRAME_H / 2, false, false, false);
     create_hitbox(160, 135, 320, 45, 160, 0, false, false, false);
@@ -143,7 +146,22 @@ void game_logic() {     // everything else
 
 void game_draw() {      // drawing the frame
     blit(background, buffer, 0, 0, 0, 0, GAME_HRES, GAME_VRES);
-    blit(((control_state & CONTROL_SPRINT) && natsuki_moving) ? natsuki_spritesheet_run : natsuki_spritesheet_walk, natsuki_sprite, (natsuki_moving ? (NATSUKI_FRAME_W * ((frames / 6) % ((control_state & CONTROL_SPRINT) ? NATSUKI_FRAME_NUM_RUN : NATSUKI_FRAME_NUM_WALK))) : 0), 0, 0, 0, NATSUKI_FRAME_W, NATSUKI_FRAME_H);
+    blit((grounded
+                ? (((control_state & CONTROL_SPRINT) && natsuki_moving)
+                    ? natsuki_spritesheet_run
+                    : natsuki_spritesheet_walk)
+                : ((natsuki_y_speed > 0)
+                    ? natsuki_spritesheet_fall
+                    : natsuki_spritesheet_jump)),
+            natsuki_sprite, NATSUKI_FRAME_W * ((frames / 6) %
+                ((natsuki_moving && grounded)
+                 ? ((control_state & CONTROL_SPRINT)
+                     ? NATSUKI_FRAME_NUM_RUN
+                     : NATSUKI_FRAME_NUM_WALK)
+                 : ((natsuki_y_speed > 0)
+                     ? NATSUKI_FRAME_NUM_FALL
+                     : NATSUKI_FRAME_NUM_JUMP))),
+            0, 0, 0, NATSUKI_FRAME_W, NATSUKI_FRAME_H);
     switch (natsuki_hitbox.flipped){
         case  O:         draw_sprite(buffer, natsuki_sprite, natsuki_hitbox.position.x - (NATSUKI_FRAME_W / 2), natsuki_hitbox.position.y - (NATSUKI_FRAME_H / 2)); break;
         case  H:  draw_sprite_h_flip(buffer, natsuki_sprite, natsuki_hitbox.position.x - (NATSUKI_FRAME_W / 2), natsuki_hitbox.position.y - (NATSUKI_FRAME_H / 2)); break;
