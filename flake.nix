@@ -12,16 +12,21 @@
 
   outputs = inputs@{ self, nixpkgs, ... }: let
     system = "x86_64-linux";
-    pkgs = nixpkgs.legacyPackages.${system};
+    pkgs = import nixpkgs {
+      inherit system;
+      config.allowUnfree = true; # We're not running Debian here, are we?
+    };
   in {
     devShells.${system} = {
       default = pkgs.mkShell {
         packages = with pkgs; [
           gcc
           gnumake
+          gdb # we'd need that
           libopenmpt
           allegro	# Yup, it's 4.4 and not 4.2, so it would have (some) differences compared to a DOS-compatible Allegro version.
           lua
+          aseprite # Required now as the spritesheets are being generated from .ase files during game compilation
         ];
       };
     };
