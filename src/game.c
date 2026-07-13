@@ -117,6 +117,7 @@ void game_init() {      // initialization routine
     natsuki_sprite = create_bitmap(NATSUKI_FRAME_W, NATSUKI_FRAME_H);
     natsuki_hitbox = create_hitbox(160, 45, NATSUKI_FRAME_W, NATSUKI_FRAME_H, NATSUKI_FRAME_W / 2, NATSUKI_FRAME_H / 2, false, false, false);
     create_hitbox(160, 135, 320, 45, 160, 0, false, false, false);
+    create_hitbox(32, 32, 16, 149, 16, 16, false, false, true);
     background = find_datafile_object(backgrounds, "BG_TOKYO_BMP")->dat;
     play_module();
 }

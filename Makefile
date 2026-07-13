@@ -11,43 +11,58 @@ TILES = road road_slope pillar
 MODFILES = title.it doomsday.it deathomen.it zoloft.it
 
 all: no-cleanup
-	rm -rf obj
+	@echo "Cleaning up intermediate build artifacts... (use \"make no-cleanup\" to retain those)"
+	@rm -rf obj
 
 no-cleanup: $(OUTFILE) music.dat sprites.dat bgs.dat tiles.dat
 
 $(OUTFILE): $(addprefix obj/bin/, $(addsuffix .o, $(CODEFILES)))
-	$(CCLD) $(LDFLAGS) -o $(OUTFILE) $^ $(LIBS)
+	@echo "CCLD $@"
+	@$(CCLD) $(LDFLAGS) -o $@ $^ $(LIBS)
 ifdef STRIP
-	$(STRIP) $(OUTFILE)
+	@echo "STRIP $@"
+	@$(STRIP) $(OUTFILE)
 endif
 
 music.dat: $(addprefix music/, $(MODFILES))
-	dat -a -c2 music.dat $^
+	@echo "DAT $@"
+	@dat -a -c2 music.dat $^
 
 sprites.dat: $(addprefix obj/spr/, $(addsuffix .bmp, $(SPRITES)))
-	dat -a -c2 -t BMP sprites.dat $^
+	@echo "DAT $@"
+	@dat -a -c2 -t BMP sprites.dat $^
 
 bgs.dat: $(addprefix obj/bg/, $(addsuffix .bmp, $(BACKGROUNDS)))
-	dat -a -c2 -t BMP bgs.dat $^
+	@echo "DAT $@"
+	@dat -a -c2 -t BMP bgs.dat $^
 
 tiles.dat: $(addprefix obj/tile/, $(addsuffix .bmp, $(TILES)))
-	dat -a -c2 -t BMP tiles.dat $^
+	@echo "DAT $@"
+	@dat -a -c2 -t BMP tiles.dat $^
 
 $(addprefix obj/bin/, $(addsuffix .o, $(CODEFILES))):
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $(subst obj/bin/,src/,$(subst .o,.c,$@)) -o $@ $(INCLUDES)
+	@echo "CC $(subst obj/bin/,src/,$(subst .o,.c,$@))"
+	@$(CC) $(CFLAGS) -c $(subst obj/bin/,src/,$(subst .o,.c,$@)) -o $@ $(INCLUDES)
 
 $(addprefix obj/spr/, $(addsuffix .bmp, $(SPRITES))):
 	@mkdir -p $(@D)
-	$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $(subst obj/spr/,sprites/,$(subst .bmp,.ase,$@)) >/dev/null
+	@echo "SPRITE $@"
+	@$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $(subst obj/spr/,sprites/,$(subst .bmp,.ase,$@)) >/dev/null
 
 obj/bg/bg_tokyo.bmp: backgrounds/bg_tokyo.ase
 	@mkdir -p $(@D)
-	$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $^ >/dev/null
+	@echo "BACKGROUND $@"
+	@$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $^ >/dev/null
 
 $(addprefix obj/tile/, $(addsuffix .bmp, $(TILES))):
 	@mkdir -p $(@D)
-	$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $(subst obj/tile/,tiles/,$(subst .bmp,.ase,$@)) >/dev/null
+	@echo "TILE $@"
+	@$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $(subst obj/tile/,tiles/,$(subst .bmp,.ase,$@)) >/dev/null
 
 clean:
-	rm -rf obj *.dat $(OUTFILE)
+	@echo "Cleaning up"
+	@rm -rf obj *.dat $(OUTFILE)
+
+love:
+	@echo "Not war?"

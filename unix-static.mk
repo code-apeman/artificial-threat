@@ -1,20 +1,19 @@
-###############################################################################################################################################
-# Makefile configuration for a generic UNIX-like OS (GNU/Linux, BSD, Solaris, etc.) default build (dynamically-linked on most UNIX-like OSes) #
-###############################################################################################################################################
+#############################################################################################################
+# Makefile configuration for a generic UNIX-like OS (GNU/Linux, BSD, Solaris, etc.) statically-linked build #
+#############################################################################################################
 
 # Aseprite/LibreSprite binary
 ASEPRITE = aseprite
 # the version of strip from binutils, uncomment to use
-#STRIP = strip
+STRIP = strip
 # the compiler to use for making the object files
 CC = cc
 # the compiler to use for linking everything together
 CCLD = $(CC)
 # flags to use with $(CC)
-#CFLAGS = -g -O2 -pipe # for a release build, also enable strip
-CFLAGS = -g -O0 -Wall # for a debug build
+CFLAGS = -g -O2 -pipe
 # flags to use with $(CCLD)
-LDFLAGS =
+LDFLAGS = -Lstatic
 # output file name
 OUTFILE = game
 # additional header file director(y/ies) for Allegro

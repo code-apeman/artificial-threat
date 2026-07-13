@@ -1,1 +1,1 @@
-unix-config.mk
+unix-static.mk

@@ -5,7 +5,7 @@ size_t collider_count = 0;
 hitbox* colliders = NULL;
 
 hitbox create_hitbox(int position_x, int position_y, int width, int height, int origin_x, int origin_y, bool flipped_x, bool flipped_y, bool slope){
-    hitbox collider = {collider_count, {position_x, position_y}, {width, height}, {origin_x, origin_y}, (flipped_y * 2) ^ flipped_x, slope};
+    hitbox collider = {collider_count, {position_x, position_y}, {width, height}, {origin_x, origin_y}, (flipped_y << 1) ^ flipped_x, slope};
     colliders = realloc(colliders, sizeof(hitbox) * (collider_count + 1));
     colliders[collider_count] = collider;
     collider_count++;
@@ -25,6 +25,31 @@ void get_hitbox_points(hitbox collider, vector2 *points){
     points[3] = (vector2){collider.position.x + (collider.size.x - collider.origin.x), collider.position.y + (collider.size.y - collider.origin.y)};
 }
 
+bool point_in_hitbox(hitbox collider, vector2 point){
+    vector2 collider_points[4];
+    get_hitbox_points(collider, collider_points);
+    if (point.x > collider_points[3].x || point.y > collider_points[3].y) return false;
+    vector2 relative_point;
+    relative_point.x = point.x - collider_points[0].x;
+    if (relative_point.x < 0) return false;
+    relative_point.y = point.y - collider_points[0].y;
+    if (relative_point.y < 0) return false;
+    if (!collider.is_slope) return true;  // all rectangular misses were already checked for
+
+    switch (collider.flipped) {
+        case O:
+            return ((collider.size.y * relative_point.x) + (collider.size.x * relative_point.y) - (collider.size.x * collider.size.y)) >= 0;
+        case V:
+            return ((collider.size.y * relative_point.x) - (collider.size.x * relative_point.y)) >= 0;
+        case H:
+            return ((collider.size.y * relative_point.x) - (collider.size.x * relative_point.y)) <= 0;
+        case VH:
+            return ((collider.size.y * relative_point.x) + (collider.size.x * relative_point.y) - (collider.size.x * collider.size.y)) <= 0;
+    }
+
+    return false; // never reached, here to eliminate a warning
+}
+
 bool check_collision(hitbox collider_a, hitbox collider_b){
     vector2 points_a[4];
     get_hitbox_points(collider_a, points_a);
@@ -38,8 +63,29 @@ bool check_collision(hitbox collider_a, hitbox collider_b){
     ) return false;
     // if both aren't slopes they do in fact collide
     if ((!collider_a.is_slope) && (!collider_b.is_slope)) return true;
-    // TODO: slope collision checks
-    return true;
+    
+    // for my own sanity i'll assume only one of the colliders is a slope
+    if (collider_a.is_slope) {
+        // OMG WHY ARE TRIGONOMETRICS SO HARD
+        if (points_a[0].x <= points_b[0].x) {
+            if (points_a[0].y <= points_b[0].y) return point_in_hitbox(collider_a, points_b[3]);
+            if (points_a[0].y >= points_b[0].y) return point_in_hitbox(collider_a, points_b[2]);
+        }
+        if (points_a[0].x >= points_b[0].x) {
+            if (points_a[0].y <= points_b[0].y) return point_in_hitbox(collider_a, points_b[1]);
+            if (points_a[0].y >= points_b[0].y) return point_in_hitbox(collider_a, points_b[0]);
+        }
+    } if (collider_b.is_slope) {
+        if (points_b[0].x <= points_a[0].x) {
+            if (points_b[0].y <= points_a[0].y) return point_in_hitbox(collider_b, points_a[3]);
+            if (points_b[0].y >= points_a[0].y) return point_in_hitbox(collider_b, points_a[2]);
+        }
+        if (points_b[0].x >= points_a[0].x) {
+            if (points_b[0].y <= points_a[0].y) return point_in_hitbox(collider_b, points_a[1]);
+            if (points_b[0].y >= points_a[0].y) return point_in_hitbox(collider_b, points_a[0]);
+        }
+    }
+    return false;
 }
 
 bool check_moving(hitbox collider, int delta_x, int delta_y){
