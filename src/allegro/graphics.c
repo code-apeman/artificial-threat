@@ -1,6 +1,7 @@
+#include <allegro.h>
 #include "includes.h"
-#include "graphics.h"
 #include "error.h"
+#include "graphics.h"
 
 BITMAP *buffer;
 int screen_w, screen_h;
@@ -18,6 +19,6 @@ void graphics_init(){
         handle_init_error("Failed to allocate the frame buffer", "graphics_init() (graphics.c)");
 }
 
-void buffer_show(){
+void draw_frame(){
     stretch_blit(buffer, screen, 0, 0, GAME_HRES, GAME_VRES, 0, 0, SCREEN_W, SCREEN_H);
 }

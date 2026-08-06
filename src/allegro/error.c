@@ -1,6 +1,7 @@
-#include "includes.h"
-#include "error.h"
-#include "textcolors.h"
+#include <allegro.h>
+#include "../includes.h"
+#include "../error.h"
+#include "../textcolors.h"
 
 void handle_deprecation(const char* function_name){
     allegro_message("%s%sDEPRECATION WARNING%s: Function %s%s%s%s is deprecated.\n",

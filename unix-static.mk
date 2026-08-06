@@ -16,6 +16,8 @@ CFLAGS = -g -O2 -pipe
 LDFLAGS = -Lstatic
 # output file name
 OUTFILE = game
+# backend being used (SDL or ALLEGRO)
+BACKEND = SDL
 # additional header file director(y/ies) for Allegro
 ALLEGRO_INCLUDES =
 # additional parameter(s) for the linker to link against Allegro libraries

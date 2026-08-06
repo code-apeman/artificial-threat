@@ -1,8 +1,10 @@
 # Intermediate build files
 obj
 
-# Resulting .dat files
+# Resulting .dat/.ar/.lza files (packs, Allegro 4 datafiles, cpf archives)
 *.dat
+*.cpf
 
 # Resulting executable
 game
+game.exe

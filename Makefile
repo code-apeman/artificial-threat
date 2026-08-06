@@ -4,10 +4,15 @@ include ${CONFIGFILE}
 LIBS = $(ALLEGRO_LIBS) $(LIBOPENMPT_LIBS)
 INCLUDES = $(ALLEGRO_INCLUDES) $(LIBOPENMPT_INCLUDES)
 
-CODEFILES = graphics sound error physics game main
+# Backend-independent code files
+CODEFILES = physics game main
+# Backend Dependent code files
+BD_CODEFILES = graphics sound error
+# Self-explanatory
 SPRITES = natsuki_walk natsuki_run natsuki_jump natsuki_fall
 BACKGROUNDS = bg_tokyo
 TILES = road road_slope pillar
+# Music module files
 MODFILES = title.it doomsday.it deathomen.it zoloft.it
 
 all: no-cleanup
@@ -45,19 +50,24 @@ $(addprefix obj/bin/, $(addsuffix .o, $(CODEFILES))):
 	@echo "CC $(subst obj/bin/,src/,$(subst .o,.c,$@))"
 	@$(CC) $(CFLAGS) -c $(subst obj/bin/,src/,$(subst .o,.c,$@)) -o $@ $(INCLUDES)
 
+$(addprefix obj/bin/, $(addsuffix .o, $(BD_CODEFILES))):
+	@mkdir -p $(@D)
+	@echo "CC $(subst obj/bin/,src/$(BACKEND)/,$(subst .o,.c,$@))"
+	@$(CC) $(CFLAGS) -c $(subst obj/bin/,src/,$(subst .o,.c,$@)) -o $@ $(INCLUDES)
+
 $(addprefix obj/spr/, $(addsuffix .bmp, $(SPRITES))):
 	@mkdir -p $(@D)
-	@echo "SPRITE $@"
+	@echo "ASEPRITE $@"
 	@$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $(subst obj/spr/,sprites/,$(subst .bmp,.ase,$@)) >/dev/null
 
-obj/bg/bg_tokyo.bmp: backgrounds/bg_tokyo.ase
+$(addprefix obj/bg/, $(addsuffix .bmp, $(BACKGROUNDS))):
 	@mkdir -p $(@D)
-	@echo "BACKGROUND $@"
-	@$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $^ >/dev/null
+	@echo "ASEPRITE $@"
+	@$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $(subst obj/bg/,backgrounds/,$(subst .bmp,.ase,$@)) >/dev/null
 
 $(addprefix obj/tile/, $(addsuffix .bmp, $(TILES))):
 	@mkdir -p $(@D)
-	@echo "TILE $@"
+	@echo "ASEPRITE $@"
 	@$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $(subst obj/tile/,tiles/,$(subst .bmp,.ase,$@)) >/dev/null
 
 clean:
@@ -65,4 +75,4 @@ clean:
 	@rm -rf obj *.dat $(OUTFILE)
 
 love:
-	@echo "Not war?"
+	@echo "Why be a war criminal when you can be GAY?"
