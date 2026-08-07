@@ -1,8 +1,8 @@
 CONFIGFILE := config.mk
 include ${CONFIGFILE}
 
-LIBS = $(ALLEGRO_LIBS) $(LIBOPENMPT_LIBS)
-INCLUDES = $(ALLEGRO_INCLUDES) $(LIBOPENMPT_INCLUDES)
+LIBS = $(BACKEND_LIBS)
+INCLUDES = $(BACKEND_INCLUDES)
 
 # Backend-independent code files
 CODEFILES = physics game main

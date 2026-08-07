@@ -17,10 +17,6 @@ LDFLAGS =
 # output file name
 OUTFILE = game
 # additional header file director(y/ies) for Allegro
-ALLEGRO_INCLUDES =
+BACKEND_INCLUDES =
 # additional parameter(s) for the linker to link against Allegro libraries
-ALLEGRO_LIBS = -lalleg
-# additional header file director(y/ies) for libopenmpt
-LIBOPENMPT_INCLUDES =
-# additional parameter(s) for the linker to link against libopenmpt libraries
-LIBOPENMPT_LIBS = -lopenmpt
+BACKEND_LIBS = -lalleg

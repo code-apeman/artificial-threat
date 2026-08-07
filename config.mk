@@ -1,1 +1,1 @@
-unix-static.mk
+unix-default-sdl.mk

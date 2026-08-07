@@ -16,13 +16,9 @@ CFLAGS = -g -O2 -pipe
 LDFLAGS = -Lstatic
 # output file name
 OUTFILE = game
-# backend being used (SDL or ALLEGRO)
+# Backend to use (SDL (SDL2) and ALLEGRO (Allegro v4.2.3.1 + MikMod) are supported)
 BACKEND = SDL
-# additional header file director(y/ies) for Allegro
-ALLEGRO_INCLUDES =
+# additional parameter(s) for the compiler to use backend headers
+INCLUDES =
 # additional parameter(s) for the linker to link against Allegro libraries
-ALLEGRO_LIBS = -lalleg
-# additional header file director(y/ies) for libopenmpt
-LIBOPENMPT_INCLUDES =
-# additional parameter(s) for the linker to link against libopenmpt libraries
-LIBOPENMPT_LIBS = -lopenmpt
+LIBS = -lSDL2_gfx -lSDL2_image -lSDL2_ttf -lSDL2_mixer
