@@ -7,6 +7,7 @@ BITMAP *buffer;
 int screen_w, screen_h;
 
 void graphics_init(){
+    allegro_init();  // graphics always inits first, so backend is always initialized there
     if (get_desktop_resolution(&screen_w, &screen_h) != 0){
         screen_w = 320; screen_h = 180;
     }
@@ -21,4 +22,8 @@ void graphics_init(){
 
 void draw_frame(){
     stretch_blit(buffer, screen, 0, 0, GAME_HRES, GAME_VRES, 0, 0, SCREEN_W, SCREEN_H);
+}
+
+void graphics_cleanup(){
+	allegro_exit();
 }

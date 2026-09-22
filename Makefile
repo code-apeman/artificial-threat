@@ -5,15 +5,18 @@ LIBS = $(BACKEND_LIBS)
 INCLUDES = $(BACKEND_INCLUDES)
 
 # Backend-independent code files
-CODEFILES = physics game main
+CODEFILES = physics game main archive
 # Backend Dependent code files
 BD_CODEFILES = graphics sound error
+ifeq ($(BACKEND),ALLEGRO)
+  BD_CODEFILES += ibxm
+endif
 # Self-explanatory
 SPRITES = natsuki_walk natsuki_run natsuki_jump natsuki_fall
 BACKGROUNDS = bg_tokyo
 TILES = road road_slope pillar
 # Music module files
-MODFILES = title.it doomsday.it deathomen.it zoloft.it
+MODFILES = title.xm void.xm deathomen.xm zoloft.xm
 
 all: no-cleanup
 	@echo "Cleaning up intermediate build artifacts... (use \"make no-cleanup\" to retain those)"
@@ -21,7 +24,7 @@ all: no-cleanup
 
 no-cleanup: $(OUTFILE) music.dat sprites.dat bgs.dat tiles.dat
 
-$(OUTFILE): $(addprefix obj/bin/, $(addsuffix .o, $(CODEFILES)))
+$(OUTFILE): $(addprefix obj/bin/, $(addsuffix .o, $(CODEFILES))) $(addprefix obj/bin/, $(addsuffix .o, $(BD_CODEFILES)))
 	@echo "CCLD $@"
 	@$(CCLD) $(LDFLAGS) -o $@ $^ $(LIBS)
 ifdef STRIP
@@ -48,12 +51,12 @@ tiles.dat: $(addprefix obj/tile/, $(addsuffix .bmp, $(TILES)))
 $(addprefix obj/bin/, $(addsuffix .o, $(CODEFILES))):
 	@mkdir -p $(@D)
 	@echo "CC $(subst obj/bin/,src/,$(subst .o,.c,$@))"
-	@$(CC) $(CFLAGS) -c $(subst obj/bin/,src/,$(subst .o,.c,$@)) -o $@ $(INCLUDES)
+	@$(CC) $(CFLAGS) -c $(subst obj/bin/,src/,$(subst .o,.c,$@)) -o $@ $(INCLUDES) -DUSE_$(BACKEND)
 
 $(addprefix obj/bin/, $(addsuffix .o, $(BD_CODEFILES))):
 	@mkdir -p $(@D)
 	@echo "CC $(subst obj/bin/,src/$(BACKEND)/,$(subst .o,.c,$@))"
-	@$(CC) $(CFLAGS) -c $(subst obj/bin/,src/,$(subst .o,.c,$@)) -o $@ $(INCLUDES)
+	@$(CC) $(CFLAGS) -c $(subst obj/bin/,src/$(BACKEND)/,$(subst .o,.c,$@)) -o $@ $(INCLUDES)
 
 $(addprefix obj/spr/, $(addsuffix .bmp, $(SPRITES))):
 	@mkdir -p $(@D)

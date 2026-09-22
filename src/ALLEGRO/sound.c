@@ -3,6 +3,8 @@
 #include "../sound.h"
 #include "../error.h"
 
+#include "ibxm.h"
+
 AUDIOSTREAM* music_stream;
 openmpt_module* loaded_module;
 int freq, bits, chcount;
