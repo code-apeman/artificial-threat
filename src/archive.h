@@ -10,16 +10,11 @@ typedef struct pkf_entry_header {   // as written into the file
     char filename[32];              // up to 31 bytes
     uint32_t filesize;              // size of file data (LE)
 } pkf_entry_header;
-typedef struct pkf_entry {
-    pkf_entry_header header;
-    void* data;
-} pkf_entry;
 typedef struct opened_pkf_archive {
     int fd;
     pkf_archive_header header;
     uint16_t file_index;
-    unsigned long long archive_position;
-    pkf_entry current_file;
+    pkf_entry_header current_entry_header;
 } opened_pkf_archive;
 opened_pkf_archive pkf_open(const char* filename);
 bool pkf_next(opened_pkf_archive archive);
