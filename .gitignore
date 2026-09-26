@@ -5,6 +5,10 @@ obj
 *.dat
 *.cpf
 
+# Temporary tools
+anw_pack
+anw_pack.exe
+
 # Resulting executable
 game
 game.exe

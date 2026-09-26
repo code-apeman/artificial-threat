@@ -1,13 +1,10 @@
 CONFIGFILE := config.mk
 include ${CONFIGFILE}
 
-LIBS = $(BACKEND_LIBS)
-INCLUDES = $(BACKEND_INCLUDES)
-
 # Backend-independent code files
 CODEFILES = physics game main archive
 # Backend Dependent code files
-BD_CODEFILES = graphics sound error
+BD_CODEFILES = graphics sound error input yield
 ifeq ($(BACKEND),ALLEGRO)
   BD_CODEFILES += ibxm
 endif
@@ -22,7 +19,7 @@ all: no-cleanup
 	@echo "Cleaning up intermediate build artifacts... (use \"make no-cleanup\" to retain those)"
 	@rm -rf obj
 
-no-cleanup: $(OUTFILE) music.dat sprites.dat bgs.dat tiles.dat
+no-cleanup: $(OUTFILE) music.anw sprites.anw bgs.anw tiles.anw
 
 $(OUTFILE): $(addprefix obj/bin/, $(addsuffix .o, $(CODEFILES))) $(addprefix obj/bin/, $(addsuffix .o, $(BD_CODEFILES)))
 	@echo "CCLD $@"
@@ -32,21 +29,17 @@ ifdef STRIP
 	@$(STRIP) $(OUTFILE)
 endif
 
-music.dat: $(addprefix music/, $(MODFILES))
-	@echo "DAT $@"
-	@dat -a -c2 music.dat $^
+music.anw: $(addprefix music/, $(MODFILES)) obj/tools/anw_pack
+	@cd music && echo "ANWPACK $@" && ../obj/tools/anw_pack ../music.anw $(MODFILES)
 
-sprites.dat: $(addprefix obj/spr/, $(addsuffix .bmp, $(SPRITES)))
-	@echo "DAT $@"
-	@dat -a -c2 -t BMP sprites.dat $^
+sprites.anw: $(addprefix obj/spr/, $(addsuffix .bmp, $(SPRITES))) obj/tools/anw_pack
+	@cd obj/spr && echo "ANWPACK $@" && ../tools/anw_pack ../../sprites.anw $(addsuffix .bmp, $(SPRITES))
 
-bgs.dat: $(addprefix obj/bg/, $(addsuffix .bmp, $(BACKGROUNDS)))
-	@echo "DAT $@"
-	@dat -a -c2 -t BMP bgs.dat $^
+bgs.anw: $(addprefix obj/bg/, $(addsuffix .bmp, $(BACKGROUNDS))) obj/tools/anw_pack
+	@cd obj/bg && echo "ANWPACK $@" && ../tools/anw_pack ../../bgs.anw $(addsuffix .bmp, $(BACKGROUNDS))
 
-tiles.dat: $(addprefix obj/tile/, $(addsuffix .bmp, $(TILES)))
-	@echo "DAT $@"
-	@dat -a -c2 -t BMP tiles.dat $^
+tiles.anw: $(addprefix obj/tile/, $(addsuffix .bmp, $(TILES))) obj/tools/anw_pack
+	@cd obj/tile && echo "ANWPACK $@" && ../tools/anw_pack ../../tiles.anw $(addsuffix .bmp, $(TILES))
 
 $(addprefix obj/bin/, $(addsuffix .o, $(CODEFILES))):
 	@mkdir -p $(@D)
@@ -73,9 +66,14 @@ $(addprefix obj/tile/, $(addsuffix .bmp, $(TILES))):
 	@echo "ASEPRITE $@"
 	@$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $(subst obj/tile/,tiles/,$(subst .bmp,.ase,$@)) >/dev/null
 
+obj/tools/anw_pack:
+	@mkdir -p $(@D)
+	@echo "CC $@"
+	@$(CC) -g -O3 -pipe tools/anw_pack.c -o obj/tools/anw_pack
+
 clean:
 	@echo "Cleaning up"
-	@rm -rf obj *.dat $(OUTFILE)
+	@rm -rf obj *.anw $(OUTFILE)
 
 love:
 	@echo "Why be a war criminal when you can be GAY?"

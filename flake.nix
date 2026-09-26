@@ -32,7 +32,6 @@
          #allegro	# Yup, it's 4.4 and not 4.2, so it would have (some) differences compared to a DOS-compatible Allegro version.
           aseprite # Required now as the spritesheets are being generated from .ase files during game compilation
           SDL2_image
-          SDL2_gfx
           SDL2_ttf
           SDL2_mixer
         ];

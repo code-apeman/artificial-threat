@@ -5,6 +5,8 @@
 #include "error.h"
 #include "input.h"
 #include "physics.h"
+#include "archive.h"
+#include <string.h>
 
 #define NATSUKI_FRAME_W 24
 #define NATSUKI_FRAME_H 32
@@ -17,11 +19,11 @@
 #define NATSUKI_JUMP_SPEED 5
 
 //DATAFILE *music, *sprites, *backgrounds, *tiles;
+opened_anw_archive *music, *sprites, *backgrounds, *tiles;
 //BITMAP *natsuki_spritesheet_walk, *natsuki_spritesheet_run, *natsuki_spritesheet_fall, *natsuki_spritesheet_jump, *natsuki_sprite;
 //BITMAP *background;
 //extern BITMAP *buffer;
 extern bool game_exit_flag;
-extern volatile bool frame_flag;
 unsigned long long int frames = 0;
 
 // Position, physics, etc.
@@ -39,38 +41,33 @@ bool grounded = false;
 // Scrolling
 unsigned int camera_x = 0, camera_y = 0;
 
-// Controls
-volatile unsigned char control_state = 0;
-
-#define CONTROL_LEFT          0b00000001
-#define CONTROL_RIGHT         0b00000010
-#define CONTROL_UP            0b00000100
-#define CONTROL_DOWN          0b00001000
-#define CONTROL_JUMP          0b00010000
-#define CONTROL_SPRINT        0b00100000
-#define CONTROL_ATTACK_MELEE  0b01000000
-#define CONTROL_ATTACK_RANGED 0b10000000
-
 void game_init() {      // initialization routine
     graphics_init();
     sound_init();
     input_init();
 
-//  music = load_datafile("music.dat");
-//  if (!music) handle_init_error("Could not load music.dat", "game_init() (game.c)");
+    music = anw_open("music.anw");
+    if (!music) handle_init_error("Could not open music.anw", "game_init() (game.c)");
 
-//  sprites = load_datafile("sprites.dat");
-//  if (!sprites) handle_init_error("Could not load sprites.dat", "game_init() (game.c)");
+    sprites = anw_open("sprites.anw");
+    if (!sprites) handle_init_error("Could not open sprites.anw", "game_init() (game.c)");
 
-//  backgrounds = load_datafile("bgs.dat");
-//  if (!backgrounds) handle_init_error("Could not load backgrounds.dat", "game_init() (game.c)");
+    backgrounds = anw_open("bgs.anw");
+    if (!backgrounds) handle_init_error("Could not open backgrounds.anw", "game_init() (game.c)");
 
-//  tiles = load_datafile("tiles.dat");
-//  if (!tiles) handle_init_error("Could not load tiles.dat", "game_init() (game.c)");
+    tiles = anw_open("tiles.anw");
+    if (!tiles) handle_init_error("Could not open tiles.anw", "game_init() (game.c)");
 
 //  DATAFILE *title_theme = find_datafile_object(music, "TITLE_XM");
 //  if (!title_theme) handle_init_error("Could not load the title song from music.dat (is the file corrupt?)", "game_init() (game.c)");
-//  if (!load_module(title_theme->dat, title_theme->size)) handle_init_error("Could not load the title song from music.dat (is the file corrupt?)", "game_init() (game.c)");
+    bool file_found = false;
+    do if (strcmp(music->current_entry_header->filename, "title.xm") == 0) {
+        file_found = true; break;
+    } while (anw_next(music));
+    if (!file_found) handle_init_error("Could not find the title song in music.anw (is the file corrupt?)", "game_init() (game.c)");
+    void* title_song = anw_load(music);
+    if (!title_song) handle_init_error("Could not load the title song from music.anw (is the file corrupt?)", "game_init() (game.c)");
+    if (!load_module(title_song, music->current_entry_header->filesize)) handle_init_error("Could not load the title song from music.anw (is the file corrupt?)", "game_init() (game.c)");
 //  natsuki_spritesheet_walk = find_datafile_object(sprites, "NATSUKI_WALK_BMP")->dat;
 //  natsuki_spritesheet_run = find_datafile_object(sprites, "NATSUKI_RUN_BMP")->dat;
 //  natsuki_spritesheet_fall = find_datafile_object(sprites, "NATSUKI_FALL_BMP")->dat;
@@ -80,10 +77,13 @@ void game_init() {      // initialization routine
 //  create_hitbox(160, 135, 320, 45, 160, 0, false, false, false);
 //  create_hitbox(32, 32, 16, 149, 16, 16, false, false, true);
 //  background = find_datafile_object(backgrounds, "BG_TOKYO_BMP")->dat;
-//  play_module();
+    play_module();
 }
 
 void game_input() {     // input collection and processing
+    // SDL: poll events
+    // Allegro: (semi-)stub (all collection done via timer)
+    unsigned char control_state = input_collect();
     if ((control_state & CONTROL_LEFT) && check_moving(natsuki_hitbox, (control_state & CONTROL_SPRINT) ? -NATSUKI_SPEED_SPRINT : -NATSUKI_SPEED_NORMAL, 0)) {
         natsuki_hitbox.position.x -= (control_state & CONTROL_SPRINT) ? NATSUKI_SPEED_SPRINT : NATSUKI_SPEED_NORMAL;
         natsuki_hitbox.flipped |=  H;
@@ -103,7 +103,6 @@ void game_logic() {     // everything else
         natsuki_hitbox.position.y += natsuki_y_speed;
         if ((frames % (int)(1/GRAVITY)) == 0) natsuki_y_speed++;
     } else natsuki_y_speed = 0;
-    buffer_check_callback();
 }
 
 void game_draw() {      // drawing the frame
