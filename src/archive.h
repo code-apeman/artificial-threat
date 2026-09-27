@@ -1,10 +1,11 @@
 // Header file for the "ANW's Not WAD" format
 #ifndef ARCHIVE_H
 #include <stdint.h>
+#include "memchunk.h"
 typedef struct anw_archive_header {
     char magic[4];                  // must be equal to ANW_MAGIC
     uint16_t file_count;            // who in their right mind would cram more
-                                    // than 65535 files into an archive?
+                                    // than 65535 files into such archive?
 } anw_archive_header;
 typedef struct anw_entry_header {   // as written into the file
     char filename[32];              // up to 31 bytes
@@ -19,7 +20,8 @@ typedef struct opened_anw_archive {
 opened_anw_archive* anw_open(const char* filename);
 bool anw_next(opened_anw_archive *archive);
 void anw_first(opened_anw_archive *archive);
-void* anw_load(opened_anw_archive *archive);
+memchunk* anw_load(opened_anw_archive *archive);
+memchunk* anw_find_and_load(opened_anw_archive *archive, const char *filename);
 #define ARCHIVE_H
 #else
 #warning "Multiple inclusions of archive.h"

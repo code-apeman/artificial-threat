@@ -16,7 +16,7 @@ CCLD = $(CC)
 BACKEND = SDL
 # flags to use with $(CC)
 #CFLAGS = -g -O2 -pipe # for a release build, also enable strip
-CFLAGS = -g -O0 -Wall -pipe # for a debug build
+CFLAGS = -g -O0 -Wall -Wextra -Wpedantic -pipe # for a debug build
 # flags to use with $(CCLD)
 LDFLAGS =
 # output file name
@@ -24,5 +24,4 @@ OUTFILE = game
 # additional parameter(s) for the compiler to find backend header files
 INCLUDES = $(shell sdl2-config --cflags)
 # additional parameter(s) for the linker to link against backend libraries
-#LIBS = $(shell sdl2-config --libs)
-LIBS = -L/nix/store/da69qm9bail6gvla94gdx29kk7gvlmvj-sdl2-compat-2.32.70/lib -lSDL2 -L/nix/store/31820n440745n9lx1vnrvqcbnw3w6nib-SDL2_mixer-2.8.2/lib -lSDL2_mixer -L/nix/store/0v0ysy5zl692gmybfxcmrsijnxjgvsnm-SDL2_image-2.8.12/lib -lSDL2_image # fuck nixos, all my homies hate nixos
+LIBS = $(shell sdl2-config --libs) $(shell pkgconf SDL2_mixer SDL2_ttf SDL2_image --libs)

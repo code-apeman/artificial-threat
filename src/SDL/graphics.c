@@ -19,8 +19,8 @@ void graphics_init(void){
     asset_vector = malloc(sizeof(SDL_Texture*) * 65536);
     SDL_RenderClear(renderer);
 }
-graphics_asset_id load_graphics_asset(void* bitmap_data, int data_size){
-    SDL_RWops *asset_buffer = SDL_RWFromMem(bitmap_data, data_size);
+graphics_asset_id load_graphics_asset(memchunk* bitmap_chunk){
+    SDL_RWops *asset_buffer = SDL_RWFromConstMem(bitmap_chunk->pointer, bitmap_chunk->size);
     asset_count++;
     asset_vector[asset_count - 1] = IMG_LoadTexture_RW(renderer, asset_buffer, 1);
     return asset_count - 1;
@@ -28,10 +28,10 @@ graphics_asset_id load_graphics_asset(void* bitmap_data, int data_size){
 void set_background(graphics_asset_id asset){
     background_id = asset;
 }
-void draw_sprite(int x, int y, int w, int h, char framecount, char framenum, graphics_asset_id asset){
-    SDL_Rect sprite_rect = {x, y, w, h};
-    SDL_Rect frame_rect = {(framenum - 1) * w, 0, w, h};
-    SDL_RenderCopy(renderer, asset_vector[asset], &frame_rect, &sprite_rect);
+void draw_sprite(vector2 pos, vector2 size, flipped flip, char framecount, char framenum, graphics_asset_id asset){
+    SDL_Rect sprite_rect = {pos.x, pos.y, size.x, size.y};
+    SDL_Rect frame_rect = {(framecount - 1 - framenum) * size.x, 0, size.x, size.y};
+    SDL_RenderCopyEx(renderer, asset_vector[asset], &frame_rect, &sprite_rect, 0.0, NULL, (SDL_RendererFlip) flip); // "vecflip.h"'s flipped struct is, coincidentally, a carbon copy of SDL_RendererFlip
 }
 void draw_frame(void){
     if (asset_vector[background_id]) SDL_RenderCopy(renderer, asset_vector[background_id], NULL, NULL);
@@ -39,6 +39,7 @@ void draw_frame(void){
     SDL_RenderClear(renderer);
 }
 void graphics_cleanup(void){
+    for (int i = 0; i < asset_count; i++) SDL_DestroyTexture(asset_vector[i]);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

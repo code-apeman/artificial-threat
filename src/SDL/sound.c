@@ -6,6 +6,10 @@
 Mix_Music *mixer_music;
 
 void sound_init(){
+    if (Mix_Init(MIX_INIT_MOD) != MIX_INIT_MOD){
+        handle_init_error("Failed to initialize audio; SDL mixer does not support modules.", "sound.c");
+        exit(-1);
+    }
     if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT,
                       MIX_DEFAULT_CHANNELS, 1024)){
         handle_init_error("Failed to initialize audio.", "sound.c");
@@ -13,11 +17,11 @@ void sound_init(){
     }
 }
 
-bool load_module(void* mod_data, size_t mod_size){
+bool load_module(memchunk *mod_chunk){
     if (mixer_music) Mix_FreeMusic(mixer_music);
-    SDL_RWops *music_buffer = SDL_RWFromMem(mod_data, mod_size);
+    SDL_RWops *music_buffer = SDL_RWFromConstMem(mod_chunk->pointer, mod_chunk->size);
     if (!music_buffer) return false;
-    mixer_music = Mix_LoadMUS_RW(music_buffer, 0);
+    mixer_music = Mix_LoadMUS_RW(music_buffer, 1);
     if (!mixer_music) return false;
     return true;
 }

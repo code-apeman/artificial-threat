@@ -1,16 +1,5 @@
 #ifndef PHYSICS_H
-typedef struct vector2 {
-    int x, y;
-} vector2;
-
-typedef enum flipped {
-    O = 0,
-    H = 1,
-    V = 2,
-    VH = 3
-} flipped;
-
-// mask (if not NULL) should always have (((size.x * size.y) / 8) + ((size.x % 8 > 0) * size.y)) bytes allocated in memory, otherwise it would segfault
+#include "vecflip.h"
 typedef struct hitbox {
     unsigned int id;
     vector2 position, size, origin;

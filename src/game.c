@@ -6,7 +6,6 @@
 #include "input.h"
 #include "physics.h"
 #include "archive.h"
-#include <string.h>
 
 #define NATSUKI_FRAME_W 24
 #define NATSUKI_FRAME_H 32
@@ -18,11 +17,9 @@
 #define NATSUKI_SPEED_SPRINT 3
 #define NATSUKI_JUMP_SPEED 5
 
-//DATAFILE *music, *sprites, *backgrounds, *tiles;
 opened_anw_archive *music, *sprites, *backgrounds, *tiles;
-//BITMAP *natsuki_spritesheet_walk, *natsuki_spritesheet_run, *natsuki_spritesheet_fall, *natsuki_spritesheet_jump, *natsuki_sprite;
-//BITMAP *background;
-//extern BITMAP *buffer;
+graphics_asset_id natsuki_spritesheet_walk, natsuki_spritesheet_run, natsuki_spritesheet_fall, natsuki_spritesheet_jump;
+graphics_asset_id background;
 extern bool game_exit_flag;
 unsigned long long int frames = 0;
 
@@ -58,25 +55,18 @@ void game_init() {      // initialization routine
     tiles = anw_open("tiles.anw");
     if (!tiles) handle_init_error("Could not open tiles.anw", "game_init() (game.c)");
 
-//  DATAFILE *title_theme = find_datafile_object(music, "TITLE_XM");
-//  if (!title_theme) handle_init_error("Could not load the title song from music.dat (is the file corrupt?)", "game_init() (game.c)");
-    bool file_found = false;
-    do if (strcmp(music->current_entry_header->filename, "title.xm") == 0) {
-        file_found = true; break;
-    } while (anw_next(music));
-    if (!file_found) handle_init_error("Could not find the title song in music.anw (is the file corrupt?)", "game_init() (game.c)");
-    void* title_song = anw_load(music);
+    memchunk* title_song = anw_find_and_load(music, "title.xm");
     if (!title_song) handle_init_error("Could not load the title song from music.anw (is the file corrupt?)", "game_init() (game.c)");
-    if (!load_module(title_song, music->current_entry_header->filesize)) handle_init_error("Could not load the title song from music.anw (is the file corrupt?)", "game_init() (game.c)");
-//  natsuki_spritesheet_walk = find_datafile_object(sprites, "NATSUKI_WALK_BMP")->dat;
-//  natsuki_spritesheet_run = find_datafile_object(sprites, "NATSUKI_RUN_BMP")->dat;
-//  natsuki_spritesheet_fall = find_datafile_object(sprites, "NATSUKI_FALL_BMP")->dat;
-//  natsuki_spritesheet_jump = find_datafile_object(sprites, "NATSUKI_JUMP_BMP")->dat;
-//  natsuki_sprite = create_bitmap(NATSUKI_FRAME_W, NATSUKI_FRAME_H);
-//  natsuki_hitbox = create_hitbox(160, 45, NATSUKI_FRAME_W, NATSUKI_FRAME_H, NATSUKI_FRAME_W / 2, NATSUKI_FRAME_H / 2, false, false, false);
-//  create_hitbox(160, 135, 320, 45, 160, 0, false, false, false);
-//  create_hitbox(32, 32, 16, 149, 16, 16, false, false, true);
-//  background = find_datafile_object(backgrounds, "BG_TOKYO_BMP")->dat;
+    if (!load_module(title_song)) handle_init_error("Could not load the title song from music.anw (is the file corrupt?)", "game_init() (game.c)");
+    natsuki_spritesheet_walk = load_graphics_asset(anw_find_and_load(sprites, "natsuki_walk.bmp"));
+    natsuki_spritesheet_run  = load_graphics_asset(anw_find_and_load(sprites, "natsuki_run.bmp"));
+    natsuki_spritesheet_fall = load_graphics_asset(anw_find_and_load(sprites, "natsuki_fall.bmp"));
+    natsuki_spritesheet_jump = load_graphics_asset(anw_find_and_load(sprites, "natsuki_jump.bmp"));
+    natsuki_hitbox = create_hitbox(160, 45, NATSUKI_FRAME_W, NATSUKI_FRAME_H, NATSUKI_FRAME_W / 2, NATSUKI_FRAME_H / 2, false, false, false);
+    create_hitbox(160, 135, 320, 45, 160, 0, false, false, false);
+    create_hitbox(32, 32, 16, 149, 16, 16, false, false, true);
+    background = load_graphics_asset(anw_find_and_load(backgrounds, "bg_tokyo.bmp"));
+    set_background(background);
     play_module();
 }
 
