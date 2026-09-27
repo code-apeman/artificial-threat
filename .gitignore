@@ -1,9 +1,8 @@
 # Intermediate build files
 obj
 
-# Resulting .dat/.ar/.lza files (packs, Allegro 4 datafiles, cpf archives)
-*.dat
-*.cpf
+# Resulting .anw files
+*.anw
 
 # Temporary tools
 anw_pack
