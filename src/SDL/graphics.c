@@ -30,7 +30,7 @@ void set_background(graphics_asset_id asset){
 }
 void draw_sprite(vector2 pos, vector2 size, flipped flip, char framecount, char framenum, graphics_asset_id asset){
     SDL_Rect sprite_rect = {pos.x, pos.y, size.x, size.y};
-    SDL_Rect frame_rect = {(framecount - 1 - framenum) * size.x, 0, size.x, size.y};
+    SDL_Rect frame_rect = {framenum * size.x, 0, size.x, size.y};
     SDL_RenderCopyEx(renderer, asset_vector[asset], &frame_rect, &sprite_rect, 0.0, NULL, (SDL_RendererFlip) flip); // "vecflip.h"'s flipped struct is, coincidentally, a carbon copy of SDL_RendererFlip
 }
 void draw_frame(void){
