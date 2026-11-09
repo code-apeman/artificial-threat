@@ -27,6 +27,7 @@ unsigned long long int frames = 0;
 hitbox natsuki_hitbox;
 int natsuki_y_speed = 0;
 bool natsuki_moving = false;
+unsigned char control_state;
 
 // Stats
 unsigned int natsuki_mhp = 50, natsuki_atk = 2, natsuki_def = 0;
@@ -73,7 +74,7 @@ void game_init() {      // initialization routine
 void game_input() {     // input collection and processing
     // SDL: poll events
     // Allegro: (semi-)stub (all collection done via timer)
-    unsigned char control_state = input_collect();
+    control_state = input_collect();
     if ((control_state & CONTROL_LEFT) && check_moving(natsuki_hitbox, (control_state & CONTROL_SPRINT) ? -NATSUKI_SPEED_SPRINT : -NATSUKI_SPEED_NORMAL, 0)) {
         natsuki_hitbox.position.x -= (control_state & CONTROL_SPRINT) ? NATSUKI_SPEED_SPRINT : NATSUKI_SPEED_NORMAL;
         natsuki_hitbox.flipped |=  H;
@@ -96,29 +97,23 @@ void game_logic() {     // everything else
 }
 
 void game_draw() {      // drawing the frame
-//  blit(background, buffer, 0, 0, 0, 0, GAME_HRES, GAME_VRES);
-//  blit((grounded
-//              ? (((control_state & CONTROL_SPRINT) && natsuki_moving)
-//                  ? natsuki_spritesheet_run
-//                  : natsuki_spritesheet_walk)
-//              : ((natsuki_y_speed > 0)
-//                  ? natsuki_spritesheet_fall
-//                  : natsuki_spritesheet_jump)),
-//          natsuki_sprite, NATSUKI_FRAME_W * ((frames / 6) %
-//              ((natsuki_moving && grounded)
-//               ? ((control_state & CONTROL_SPRINT)
-//                   ? NATSUKI_FRAME_NUM_RUN
-//                   : NATSUKI_FRAME_NUM_WALK)
-//               : ((natsuki_y_speed > 0)
-//                   ? NATSUKI_FRAME_NUM_FALL
-//                   : NATSUKI_FRAME_NUM_JUMP))),
-//          0, 0, 0, NATSUKI_FRAME_W, NATSUKI_FRAME_H);
-//  switch (natsuki_hitbox.flipped){
-//      case  O:         draw_sprite(buffer, natsuki_sprite, natsuki_hitbox.position.x - (NATSUKI_FRAME_W / 2), natsuki_hitbox.position.y - (NATSUKI_FRAME_H / 2)); break;
-//      case  H:  draw_sprite_h_flip(buffer, natsuki_sprite, natsuki_hitbox.position.x - (NATSUKI_FRAME_W / 2), natsuki_hitbox.position.y - (NATSUKI_FRAME_H / 2)); break;
-//      case  V:  draw_sprite_v_flip(buffer, natsuki_sprite, natsuki_hitbox.position.x - (NATSUKI_FRAME_W / 2), natsuki_hitbox.position.y - (NATSUKI_FRAME_H / 2)); break;
-//      case VH: draw_sprite_vh_flip(buffer, natsuki_sprite, natsuki_hitbox.position.x - (NATSUKI_FRAME_W / 2), natsuki_hitbox.position.y - (NATSUKI_FRAME_H / 2)); break;
-//  }
+  //draw_sprite((grounded
+  //            ? (((control_state & CONTROL_SPRINT) && natsuki_moving)
+  //                ? natsuki_spritesheet_run
+  //                : natsuki_spritesheet_walk)
+  //            : ((natsuki_y_speed > 0)
+  //                ? natsuki_spritesheet_fall
+  //                : natsuki_spritesheet_jump)),
+  //        NATSUKI_FRAME_W * ((frames / 6) %
+  //            ((natsuki_moving && grounded)
+  //             ? ((control_state & CONTROL_SPRINT)
+  //                 ? NATSUKI_FRAME_NUM_RUN
+  //                 : NATSUKI_FRAME_NUM_WALK)
+  //             : ((natsuki_y_speed > 0)
+  //                 ? NATSUKI_FRAME_NUM_FALL
+  //                 : NATSUKI_FRAME_NUM_JUMP))),
+  //        0, 0, 0, NATSUKI_FRAME_W, NATSUKI_FRAME_H);
+    draw_sprite(natsuki_hitbox.position, (vector2){160, 100}, natsuki_hitbox.flipped, NATSUKI_FRAME_NUM_WALK, (frames / 6) % NATSUKI_FRAME_NUM_WALK, natsuki_spritesheet_walk);
     frames++;           // increment the frame counter
     draw_frame();       // do what the function says
 }
