@@ -51,25 +51,30 @@ $(addprefix obj/bin/, $(addsuffix .o, $(BD_CODEFILES))):
 	@echo "CC $(subst obj/bin/,src/$(BACKEND)/,$(subst .o,.c,$@))"
 	@$(CC) $(CFLAGS) -c $(subst obj/bin/,src/$(BACKEND)/,$(subst .o,.c,$@)) -o $@ $(INCLUDES)
 
-$(addprefix obj/spr/, $(addsuffix .bmp, $(SPRITES))):
+$(addprefix obj/spr/, $(addsuffix .bmp, $(SPRITES))): obj/tools/asepritesheet
 	@mkdir -p $(@D)
 	@echo "ASEPRITE $@"
-	@$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $(subst obj/spr/,sprites/,$(subst .bmp,.ase,$@)) >/dev/null
+	@obj/tools/asepritesheet $(subst obj/spr/,sprites/,$(subst .bmp,.ase,$@)) $@
 
-$(addprefix obj/bg/, $(addsuffix .bmp, $(BACKGROUNDS))):
+$(addprefix obj/bg/, $(addsuffix .bmp, $(BACKGROUNDS))): obj/tools/asepritesheet
 	@mkdir -p $(@D)
 	@echo "ASEPRITE $@"
-	@$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $(subst obj/bg/,backgrounds/,$(subst .bmp,.ase,$@)) >/dev/null
+	@obj/tools/asepritesheet $(subst obj/bg/,backgrounds/,$(subst .bmp,.ase,$@)) $@
 
-$(addprefix obj/tile/, $(addsuffix .bmp, $(TILES))):
+$(addprefix obj/tile/, $(addsuffix .bmp, $(TILES))): obj/tools/asepritesheet
 	@mkdir -p $(@D)
 	@echo "ASEPRITE $@"
-	@$(ASEPRITE) -b --sheet $@ --sheet-type horizontal $(subst obj/tile/,tiles/,$(subst .bmp,.ase,$@)) >/dev/null
+	@obj/tools/asepritesheet $(subst obj/tile/,tiles/,$(subst .bmp,.ase,$@)) $@
 
 obj/tools/anw_pack:
 	@mkdir -p $(@D)
 	@echo "CC $@"
-	@$(CC) -g -O3 -pipe tools/anw_pack.c -o obj/tools/anw_pack
+	@$(CC) -g -O3 -march=native -pipe tools/anw_pack.c -o obj/tools/anw_pack
+
+obj/tools/asepritesheet:
+	@mkdir -p $(@D)
+	@echo "CC $@"
+	@$(CC) -g -O3 -march=native -pipe tools/asepritesheet.c -o obj/tools/asepritesheet -lz
 
 clean:
 	@echo "Cleaning up"

@@ -2,8 +2,6 @@
 # Makefile configuration for a Windows cross-build on a generic UNIX-like OS (GNU/Linux, BSD, Solaris, etc.) or Cygwin host #
 #############################################################################################################################
 
-# Aseprite/LibreSprite binary
-ASEPRITE = aseprite
 # the version of strip from binutils, uncomment to use
 STRIP = i486-w64-mingw32-strip
 # the compiler to use for making the object files

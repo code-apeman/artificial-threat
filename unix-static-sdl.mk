@@ -2,8 +2,6 @@
 # Makefile configuration for a generic UNIX-like OS (GNU/Linux, BSD, Solaris, etc.) statically-linked build #
 #############################################################################################################
 
-# Aseprite/LibreSprite binary
-ASEPRITE = aseprite
 # the version of strip from binutils, uncomment to use
 STRIP = strip
 # the compiler to use for making the object files

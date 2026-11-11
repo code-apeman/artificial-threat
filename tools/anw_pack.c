@@ -10,8 +10,8 @@ int main(int argc, char **argv){
     if (argc <= 2) {
         fprintf(stderr, "usage: %s [anwfile] [file1] <file2, file3...>\n", argv[0]);
         return -1;
-    } unlink(argv[1]);
-    int archive_fd = open(argv[1], O_RDWR | O_CREAT, 0644);
+    }
+    int archive_fd = open(argv[1], O_RDWR | O_CREAT | O_TRUNC, 0644);
     anw_archive_header header = {
         .magic = { 'A', 'N', 'W', '0' },
         .file_count = argc - 2,
@@ -40,7 +40,7 @@ int main(int argc, char **argv){
             fprintf(stderr, "Failed to allocate memory for file #%d (%s).\n", i - 1, argv[i]);
             return -1;
         } if (read(entry_fd, databuf, header.filesize) != header.filesize){
-            fprintf(stderr, "Failed to read file #%d (%s).\n", i - 2, argv[i]);
+            fprintf(stderr, "Failed to read file #%d (%s).\n", i - 1, argv[i]);
             return -1;
         } if (write(archive_fd, databuf, header.filesize) != header.filesize){
             fprintf(stderr, "Failed to write file #%d (%s) to the archive.\n", i - 1, argv[i]);
