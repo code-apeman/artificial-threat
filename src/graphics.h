@@ -10,12 +10,22 @@ typedef struct indexed_palette_entry {
 } indexed_palette_entry;
 typedef indexed_palette_entry palette[PALSIZE];
 typedef uint8_t pixel;
-typedef pixel buffer[GAME_HRES * GAME_VRES];
+typedef struct buffer {
+    vector2* size;
+    pixel* bitmap;
+} buffer;
+void bitblt(buffer *source, buffer *dest,
+        const vector2 pos_src, const vector2 pos_dest, const vector2 blocksize,
+        const flipped mirror);
+void zmasked_bitblt(buffer *source, buffer *dest,
+        const vector2 pos_src, const vector2 pos_dest, const vector2 blocksize,
+        const flipped mirror);
 typedef uint16_t graphics_asset_id;
 void graphics_init(void);
 graphics_asset_id load_graphics_asset(memchunk *bitmap_chunk);
 void set_background(graphics_asset_id asset);
-void draw_sprite(vector2 pos, vector2 size, flipped flip, char framecount, char framenum, graphics_asset_id asset);
+void draw_sprite(vector2 pos, vector2 size, flipped flip,
+        char framecount, char framenum, graphics_asset_id asset);
 void draw_frame(void);
 void graphics_cleanup(void);
 #define GRAPHICS_H

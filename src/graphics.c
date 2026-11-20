@@ -1,4 +1,9 @@
+/*
+ * Mode 13h(-esque) graphics implementation
+ */
+
 #include <stdbool.h>
+#include <stdlib.h>
 #include "graphics.h"
 
 palette mode13h_palette = {
@@ -97,4 +102,79 @@ buffer buf1, buf2;
 buffer *front_buf = &buf1, *back_buf = &buf2;
 bool frontbuf_is_2 = false;
 
+void graphics_init(void){
+    buf1 = (buffer){&(vector2){GAME_HRES, GAME_VRES}, malloc(GAME_HRES * GAME_VRES * sizeof(pixel))};
+    buf2 = (buffer){&(vector2){GAME_HRES, GAME_VRES}, malloc(GAME_HRES * GAME_VRES * sizeof(pixel))};
+}
+
+void swap_buffers(void){
+    if(frontbuf_is_2){
+        front_buf = &buf1;
+        back_buf = &buf2;
+        frontbuf_is_2 = false;
+    } else {
+        front_buf = &buf2;
+        back_buf = &buf1;
+        frontbuf_is_2 = true;
+    }
+}
+
+// Simple BITmap BLock Transfer, the pos_* vars are using the upper left corner
+// we also mirror stuff here
+void bitblt(buffer *source, buffer *dest,
+        const vector2 pos_src, const vector2 pos_dest, const vector2 blocksize,
+        const flipped mirror){
+    // what do you mean i like ternary statements too much?
+    for (int i = (mirror & V) ? blocksize.y : 0;
+            (mirror & V) ? i > 0 : i < blocksize.y;
+            i += (mirror & V) ? -1 : 1){
+        // don't spill bytes in/from nonexistent lines
+        if (pos_dest.y + i < 0) continue;
+        if (pos_dest.y + i > dest->size->y) continue;
+        if (pos_src.y + i < 0) continue;
+        if (pos_src.y + i > source->size->y) continue;
+        for (int j = (mirror & H) ? blocksize.x : 0;
+                (mirror & H) ? j > 0 : j < blocksize.x;
+                j += (mirror & H) ? -1 : 1){
+            // don't spill bytes in/from nonexistent columns
+            if (pos_dest.x + j < 0) continue;
+            if (pos_dest.x + j > dest->size->x) continue;
+            if (pos_src.x + j < 0) continue;
+            if (pos_src.x + j > source->size->x) continue;
+            // actual transfer
+            dest->bitmap[i * dest->size->x + j] =
+                source->bitmap[i * source->size->x + j];
+        }
+    }
+}
+
+// 0-Masked BITmap BLock Transfer (e. g. for sprites)
+void zmasked_bitblt(buffer *source, buffer *dest,
+        const vector2 pos_src, const vector2 pos_dest, const vector2 blocksize,
+        const flipped mirror){
+    // what do you mean i like ternary statements too much?
+    for (int i = (mirror & V) ? blocksize.y : 0;
+            (mirror & V) ? i > 0 : i < blocksize.y;
+            i += (mirror & V) ? -1 : 1){
+        // don't spill bytes in/from nonexistent lines
+        if (pos_dest.y + i < 0) continue;
+        if (pos_dest.y + i > dest->size->y) continue;
+        if (pos_src.y + i < 0) continue;
+        if (pos_src.y + i > source->size->y) continue;
+        for (int j = (mirror & H) ? blocksize.x : 0;
+                (mirror & H) ? j > 0 : j < blocksize.x;
+                j += (mirror & H) ? -1 : 1){
+            // don't spill bytes in/from nonexistent columns
+            if (pos_dest.x + j < 0) continue;
+            if (pos_dest.x + j > dest->size->x) continue;
+            if (pos_src.x + j < 0) continue;
+            if (pos_src.x + j > source->size->x) continue;
+            // actual transfer
+            dest->bitmap[i * dest->size->x + j] =
+                source->bitmap[i * source->size->x + j] != 0
+                ? source->bitmap[i * source->size->x + j]
+                : dest->bitmap[i * dest->size->x + j];
+        }
+    }
+}
 
