@@ -103,8 +103,11 @@ buffer *front_buf = &buf1, *back_buf = &buf2;
 bool frontbuf_is_2 = false;
 
 void graphics_init(void){
-    buf1 = (buffer){&(vector2){GAME_HRES, GAME_VRES}, malloc(GAME_HRES * GAME_VRES * sizeof(pixel))};
-    buf2 = (buffer){&(vector2){GAME_HRES, GAME_VRES}, malloc(GAME_HRES * GAME_VRES * sizeof(pixel))};
+    vector2 *bufsize = malloc(sizeof(vector2));
+    bufsize->x = GAME_HRES;
+    bufsize->y = GAME_VRES;
+    buf1 = (buffer){bufsize, malloc(GAME_HRES * GAME_VRES * sizeof(pixel))};
+    buf2 = (buffer){bufsize, malloc(GAME_HRES * GAME_VRES * sizeof(pixel))};
 }
 
 void swap_buffers(void){
@@ -124,26 +127,28 @@ void swap_buffers(void){
 void bitblt(buffer *source, buffer *dest,
         const vector2 pos_src, const vector2 pos_dest, const vector2 blocksize,
         const flipped mirror){
-    // what do you mean i like ternary statements too much?
-    for (int i = (mirror & V) ? blocksize.y : 0;
-            (mirror & V) ? i > 0 : i < blocksize.y;
-            i += (mirror & V) ? -1 : 1){
+    int soff, doff;
+    for (int i = 0; i < blocksize.y; i++){
         // don't spill bytes in/from nonexistent lines
         if (pos_dest.y + i < 0) continue;
         if (pos_dest.y + i > dest->size->y) continue;
         if (pos_src.y + i < 0) continue;
         if (pos_src.y + i > source->size->y) continue;
-        for (int j = (mirror & H) ? blocksize.x : 0;
-                (mirror & H) ? j > 0 : j < blocksize.x;
-                j += (mirror & H) ? -1 : 1){
+        for (int j = 0; j < blocksize.x; j++){
             // don't spill bytes in/from nonexistent columns
             if (pos_dest.x + j < 0) continue;
             if (pos_dest.x + j > dest->size->x) continue;
             if (pos_src.x + j < 0) continue;
             if (pos_src.x + j > source->size->x) continue;
+            // offsets (what do you mean i like ternary statements too much?)
+            soff = (
+                (pos_src.y + ((mirror & V) ? blocksize.y - i - 1 : i))
+                * source->size->x +
+                (pos_src.x + ((mirror & H) ? blocksize.x - j - 1 : j))
+            );
+            doff = (pos_dest.y + i) * dest->size->x + (pos_dest.x + j);
             // actual transfer
-            dest->bitmap[i * dest->size->x + j] =
-                source->bitmap[i * source->size->x + j];
+            dest->bitmap[doff] = source->bitmap[soff];
         }
     }
 }
@@ -152,28 +157,29 @@ void bitblt(buffer *source, buffer *dest,
 void zmasked_bitblt(buffer *source, buffer *dest,
         const vector2 pos_src, const vector2 pos_dest, const vector2 blocksize,
         const flipped mirror){
-    // what do you mean i like ternary statements too much?
-    for (int i = (mirror & V) ? blocksize.y : 0;
-            (mirror & V) ? i > 0 : i < blocksize.y;
-            i += (mirror & V) ? -1 : 1){
+    int soff, doff;
+    for (int i = 0; i < blocksize.y; i++){
         // don't spill bytes in/from nonexistent lines
         if (pos_dest.y + i < 0) continue;
         if (pos_dest.y + i > dest->size->y) continue;
         if (pos_src.y + i < 0) continue;
         if (pos_src.y + i > source->size->y) continue;
-        for (int j = (mirror & H) ? blocksize.x : 0;
-                (mirror & H) ? j > 0 : j < blocksize.x;
-                j += (mirror & H) ? -1 : 1){
+        for (int j = 0; j < blocksize.x; j++){
             // don't spill bytes in/from nonexistent columns
             if (pos_dest.x + j < 0) continue;
             if (pos_dest.x + j > dest->size->x) continue;
             if (pos_src.x + j < 0) continue;
             if (pos_src.x + j > source->size->x) continue;
+            // offsets (what do you mean i like ternary statements too much?)
+            soff = (
+                (pos_src.y + ((mirror & V) ? blocksize.y - i - 1 : i))
+                * source->size->x +
+                (pos_src.x + ((mirror & H) ? blocksize.x - j - 1 : j))
+            );
+            doff = (pos_dest.y + i) * dest->size->x + (pos_dest.x + j);
             // actual transfer
-            dest->bitmap[i * dest->size->x + j] =
-                source->bitmap[i * source->size->x + j] != 0
-                ? source->bitmap[i * source->size->x + j]
-                : dest->bitmap[i * dest->size->x + j];
+            if (source->bitmap[soff] != 0)
+                dest->bitmap[doff] = source->bitmap[soff];
         }
     }
 }
