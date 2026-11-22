@@ -1,1 +1,0 @@
-unix-default-sdl.mk
