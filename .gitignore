@@ -7,7 +7,12 @@ obj
 # Temporary tools
 anw_pack
 anw_pack.exe
+asepritesheet
+asepritesheet.exe
 
 # Resulting executable
 game
 game.exe
+
+# Locally chosen build configuration
+config.mk
