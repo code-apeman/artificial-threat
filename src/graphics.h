@@ -1,3 +1,4 @@
+// TODO: make the header more readable; clean up all the fluff
 #ifndef GRAPHICS_H
 #include <stdint.h>
 #include "memchunk.h"
