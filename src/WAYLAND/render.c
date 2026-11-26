@@ -22,6 +22,7 @@ uint32_t mode13h_lut[PALSIZE];
 extern buffer *front_buf;
 
 struct wl_display *display;
+struct wl_registry *registry;
 struct wl_compositor* compositor;
 struct wl_surface* surface;
 struct wl_buffer* wl_buf;
@@ -32,6 +33,9 @@ struct xdg_surface* xdg_surface;
 struct wl_seat* seat;
 struct wl_keyboard* keyboard;
 
+int wl_shm_fd;
+struct wl_shm_pool* pool;
+
 uint16_t window_width = GAME_HRES;
 uint16_t window_height = GAME_VRES;
 uint32_t *pixbuf;
@@ -40,7 +44,7 @@ int allocate_sharedmem(uint64_t size) {
     char name[8];
     name[0] = '/';
     name[7] = 0;
-    for (int i = 1; i < 6; i++)
+    for (int i = 1; i < 7; i++)
         name[i] = (rand() & 23) + 97;
 
     int fd = shm_open(name,
@@ -52,17 +56,17 @@ int allocate_sharedmem(uint64_t size) {
 }
 
 void resize() {
-    int fd = allocate_sharedmem(window_width * window_height * 4);
+    if (pool) wl_shm_pool_destroy(pool);
+    if (wl_shm_fd > 0) close(wl_shm_fd);
+    wl_shm_fd = allocate_sharedmem(window_width * window_height * 4);
 
     pixbuf = mmap(NULL, window_width * window_height * sizeof(uint32_t),
-            PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+            PROT_READ | PROT_WRITE, MAP_SHARED, wl_shm_fd, 0);
 
-    struct wl_shm_pool* pool = wl_shm_create_pool(sharedmem, fd,
+    pool = wl_shm_create_pool(sharedmem, wl_shm_fd,
             window_width * window_height * sizeof(uint32_t));
     wl_buf = wl_shm_pool_create_buffer(pool, 0, window_width, window_height,
             window_width * sizeof(uint32_t), WL_SHM_FORMAT_ARGB8888);
-    wl_shm_pool_destroy(pool);
-    close(fd);
 }
 
 void xdg_surface_configure(void* data, struct xdg_surface *xdg_surface,
@@ -104,7 +108,7 @@ static void registry_handle_global(void *data, struct wl_registry *registry,
                 4);
     else if (strcmp(interface, wl_shm_interface.name) == 0)
         sharedmem = wl_registry_bind(registry, name, &wl_shm_interface, 1);
-    else if (strcmp(interface, xdg_wm_base_interface.name)) {
+    else if (strcmp(interface, xdg_wm_base_interface.name) == 0) {
         shell = wl_registry_bind(registry, name, &xdg_wm_base_interface, 1);
         xdg_wm_base_add_listener(shell, &shell_listener, NULL);
     } else if (strcmp(interface, wl_seat_interface.name) == 0) {
@@ -124,14 +128,14 @@ static const struct wl_registry_listener registry_listener = {
 void render_init(void){
     // first off, populate the LUT for the palette
     for (int i = 0; i < PALSIZE; i++)
-        mode13h_lut[i] = (uint32_t)mode13h_palette[i].padding << 6
-            ^ (uint32_t)mode13h_palette[i].r << 4
-            ^ (uint32_t)mode13h_palette[i].g << 2
+        mode13h_lut[i] = (uint32_t)mode13h_palette[i].padding << 24
+            ^ (uint32_t)mode13h_palette[i].r << 16
+            ^ (uint32_t)mode13h_palette[i].g << 8
             ^ (uint32_t)mode13h_palette[i].b;
 
     // and now we initialize our Wayland client
     display = wl_display_connect(NULL);
-    struct wl_registry *registry = wl_display_get_registry(display);
+    registry = wl_display_get_registry(display);
     wl_registry_add_listener(registry, &registry_listener, NULL);
     wl_display_roundtrip(display);
 
@@ -143,6 +147,12 @@ void render_init(void){
     xdg_toplevel_add_listener(top, &top_listener, NULL);
     xdg_toplevel_set_title(top, "Artificial Threat");
     wl_surface_commit(surface);
+    if (wl_display_roundtrip(display) < 0)
+        handle_init_error("Display Round Trip Failed",
+                "render_init (render.c)");
+    if (!pixbuf || !wl_buf)
+        handle_init_error("Wayland Buffer Allocation Failed",
+                "render_init (render.c)");
 }
 void render_frame(void){
     for (int y = 0; y < GAME_VRES; y++)
@@ -151,7 +161,7 @@ void render_frame(void){
                 = mode13h_lut[front_buf->bitmap[y * GAME_HRES + x]];
 
     wl_surface_attach(surface, wl_buf, 0, 0);
-    wl_surface_damage_buffer(surface, 0, 0, GAME_HRES, GAME_VRES);
+    wl_surface_damage_buffer(surface, 0, 0, window_width, window_height);
     wl_surface_commit(surface);
 }
 void render_cleanup(void){

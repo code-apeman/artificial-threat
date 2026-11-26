@@ -41,9 +41,9 @@ bool grounded = false;
 unsigned int camera_x = 0, camera_y = 0;
 
 void game_init() {      // initialization routine
-    timer_init();
     render_init();
     graphics_init();
+    timer_init();
     sound_init();
     input_init();
 
