@@ -2,11 +2,11 @@ CONFIGFILE := config.mk
 include ${CONFIGFILE}
 
 # Backend-independent code files
-CODEFILES = physics game main archive
+CODEFILES = physics game main archive ibxm graphics mixer
 # Backend Dependent code files
-BD_CODEFILES = graphics sound error input yield
-ifeq ($(BACKEND),ALLEGRO)
-  BD_CODEFILES += ibxm
+BD_CODEFILES = render sound error input yield
+ifeq ($(BACKEND),WAYLAND)
+  BD_CODEFILES += xdg-shell-client-protocol
 endif
 # Self-explanatory
 SPRITES = natsuki_walk natsuki_run natsuki_jump natsuki_fall

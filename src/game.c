@@ -1,11 +1,12 @@
 #include "includes.h"
 #include "game.h"
-#include "graphics.h"
+#include "render.h"
 #include "sound.h"
 #include "error.h"
 #include "input.h"
 #include "physics.h"
 #include "archive.h"
+#include "yield.h"
 
 #define NATSUKI_FRAME_W 24
 #define NATSUKI_FRAME_H 32
@@ -18,8 +19,8 @@
 #define NATSUKI_JUMP_SPEED 5
 
 opened_anw_archive *music, *sprites, *backgrounds, *tiles;
-graphics_asset_id natsuki_spritesheet_walk, natsuki_spritesheet_run, natsuki_spritesheet_fall, natsuki_spritesheet_jump;
-graphics_asset_id background;
+buffer *natsuki_spritesheet_walk, *natsuki_spritesheet_run, *natsuki_spritesheet_fall, *natsuki_spritesheet_jump;
+buffer *background;
 extern bool game_exit_flag;
 unsigned long long int frames = 0;
 
@@ -40,6 +41,8 @@ bool grounded = false;
 unsigned int camera_x = 0, camera_y = 0;
 
 void game_init() {      // initialization routine
+    timer_init();
+    render_init();
     graphics_init();
     sound_init();
     input_init();

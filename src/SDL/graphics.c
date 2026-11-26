@@ -34,9 +34,9 @@ void draw_sprite(vector2 pos, vector2 size, flipped flip, char framecount, char 
     SDL_RenderCopyEx(renderer, asset_vector[asset], &frame_rect, &sprite_rect, 0.0, NULL, (SDL_RendererFlip) flip); // "vecflip.h"'s flipped struct is, coincidentally, a carbon copy of SDL_RendererFlip
 }
 void draw_frame(void){
-    if (asset_vector[background_id]) SDL_RenderCopy(renderer, asset_vector[background_id], NULL, NULL);
     SDL_RenderPresent(renderer);
     SDL_RenderClear(renderer);
+    if (asset_vector[background_id]) SDL_RenderCopy(renderer, asset_vector[background_id], NULL, NULL);
 }
 void graphics_cleanup(void){
     for (int i = 0; i < asset_count; i++) SDL_DestroyTexture(asset_vector[i]);
