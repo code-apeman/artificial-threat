@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <stdio.h>
+#include <stdbool.h>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -16,6 +16,7 @@
 #include "../error.h"
 #include "../render.h"
 
+extern bool game_exit_flag;
 extern palette mode13h_palette;
 uint32_t mode13h_lut[PALSIZE];
 
@@ -66,7 +67,7 @@ void resize() {
     pool = wl_shm_create_pool(sharedmem, wl_shm_fd,
             window_width * window_height * sizeof(uint32_t));
     wl_buf = wl_shm_pool_create_buffer(pool, 0, window_width, window_height,
-            window_width * sizeof(uint32_t), WL_SHM_FORMAT_ARGB8888);
+            window_width * sizeof(uint32_t), WL_SHM_FORMAT_XRGB8888);
 }
 
 void xdg_surface_configure(void* data, struct xdg_surface *xdg_surface,
@@ -85,7 +86,7 @@ void xdg_toplevel_configure(void* data, struct xdg_toplevel *top, int32_t
 }
 
 void xdg_toplevel_close(void *data, struct xdg_toplevel *top) {
-    // close flag or something idk
+    game_exit_flag = true;
 }
 
 struct xdg_toplevel_listener top_listener = {
@@ -146,6 +147,8 @@ void render_init(void){
     top = xdg_surface_get_toplevel(xdg_surface);
     xdg_toplevel_add_listener(top, &top_listener, NULL);
     xdg_toplevel_set_title(top, "Artificial Threat");
+    xdg_toplevel_set_min_size(top, GAME_HRES, GAME_VRES);
+    xdg_toplevel_set_max_size(top, GAME_HRES, GAME_VRES);
     wl_surface_commit(surface);
     if (wl_display_roundtrip(display) < 0)
         handle_init_error("Display Round Trip Failed",
@@ -163,6 +166,8 @@ void render_frame(void){
     wl_surface_attach(surface, wl_buf, 0, 0);
     wl_surface_damage_buffer(surface, 0, 0, window_width, window_height);
     wl_surface_commit(surface);
+    if (!wl_display_dispatch(display))
+        game_exit_flag = true;
 }
 void render_cleanup(void){
     if(keyboard) wl_keyboard_release(keyboard);
